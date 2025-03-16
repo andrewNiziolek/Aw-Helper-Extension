@@ -30,6 +30,7 @@ goBtn.addEventListener("click", () => {
   const MIDValue = importMIDBox.value;
   const URLs = [
     `https://ui.awin.com/tracking-settings/us/awin/advertiser/${MIDValue}/main-settings`,
+    `https://ui.awin.com/awin/merchant/${MIDValue}/settings/invite-user`,
     `https://ui.awin.com/commission-manager/us/awin/merchant/${MIDValue}/commission-groups`,
     `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/plugins`,
     `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/trackingtagsettings`,
