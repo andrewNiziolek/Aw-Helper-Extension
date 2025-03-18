@@ -21,7 +21,7 @@ For an overview of the extension features, please see [here](https://aniziolek.n
 
 ## Contributing
 
-To contribute to this project, please fork the project from the [staging]() branch. Once you've completed your code changes, please open a Pull Request and outline the changes and confirming that you've tested the extension in your browser to ensure compliance with Manifest V3.
+To contribute to this project, please fork the project from the [staging](https://github.com/andrewNiziolek/Aw-Helper-Extension/tree/staging) branch. Once you've completed your code changes, please open a Pull Request and outline the changes and confirming that you've tested the extension in your browser to ensure compliance with Manifest V3.
 
 If approved, your Pull Request will be merged into staging for use on the next release.
 
