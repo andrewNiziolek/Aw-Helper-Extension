@@ -19,7 +19,7 @@ When installed, you'll see the extension in your toolbar or in the extensions su
 
 For an overview of the extension features, please see [here](https://aniziolek.notion.site/Extension-Feature-List-10416419acf180aebf0bcc04930b315d)
 
-##Contributing
+## Contributing
 
 To contribute to this project, please fork the project from the [staging]() branch. Once you've completed your code changes, please open a Pull Request and outline the changes and confirming that you've tested the extension in your browser to ensure compliance with Manifest V3.
 
