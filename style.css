@@ -9,7 +9,7 @@ body{
   color: white;
   width: 100%;
   text-align: center;
-  font-family: Tahoma, sans-serif;
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: grayscale
 }
@@ -66,12 +66,13 @@ body{
   position: relative;
   bottom: 5px;
   font-size: 16px;
+  font-weight: bold;
 }
 
 .headVer{
   grid-area: head-d;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: light;
 }
 
 .headAdv{
@@ -266,6 +267,7 @@ input:checked + .slider:before {
 
 .compatText{
   font-size: 14px;
+  font-weight: regular;
   text-align: center;
   margin-top: 15px;
 }
@@ -294,8 +296,8 @@ input:checked + .slider:before {
   text-align: left;
   margin-top: 30px;
   margin-left: 15px;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: light;
 }
 
 .techAdditionalInfo{
@@ -312,7 +314,7 @@ input:checked + .slider:before {
 }
 
 .chip{
-  font-size: 14px;
+  font-size: 12px;
   color: white;
   border-radius: 15px;
   height: min-content;
@@ -381,6 +383,7 @@ hr.solid {
   height: 40px;
   width: 100%;
   border: none;
+  font-weight: regular;
   font-size: 14px;
   background-color: #dfdfdf;
   color: black;
@@ -401,7 +404,6 @@ hr.solid {
 .collapsible-icon {
   font-size: 14px;
   font-weight: bold;
-  font-family: Tahoma, sans-serif;
   position: relative;
   top: 0px;
   color: black;

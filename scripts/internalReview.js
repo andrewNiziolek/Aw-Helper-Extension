@@ -39,11 +39,12 @@ function waitForAWCChip(callback) {
   }, 200);
 }
 
-// Add click listener when awcChip is available
 waitForAWCChip((chip) => {
-  chip.style.cursor = "pointer";
+  chip.classList.add("tooltip");
+  chip.setAttribute("data-tooltip", "Click for IR.");
+
   chip.addEventListener("click", () => {
-    let MIDValue = chip.textContent.split(" ")[0]; // Handles "123456 +2" format
+    let MIDValue = chip.textContent.split(" ")[0];
     if (!MIDValue || MIDValue === "Detected") return;
 
     const URLs = [
@@ -62,6 +63,7 @@ waitForAWCChip((chip) => {
     createIRGroupTabs(URLs);
   });
 });
+
 
 
 // goBtn activates the cT function.
