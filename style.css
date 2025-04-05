@@ -9,7 +9,7 @@ body{
   color: white;
   width: 100%;
   text-align: center;
-  font-family: Tahoma, sans-serif;
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: grayscale
 }
@@ -66,12 +66,13 @@ body{
   position: relative;
   bottom: 5px;
   font-size: 16px;
+  font-weight: bold;
 }
 
 .headVer{
   grid-area: head-d;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: light;
 }
 
 .headAdv{
@@ -266,6 +267,7 @@ input:checked + .slider:before {
 
 .compatText{
   font-size: 14px;
+  font-weight: regular;
   text-align: center;
   margin-top: 15px;
 }
@@ -281,6 +283,7 @@ input:checked + .slider:before {
   background-color: #ffffff;
   justify-content: center;
   vertical-align: middle;
+  z-index: 2;
   box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2); /* Horizontal offset, Vertical offset, Blur radius, Color */
 }
 
@@ -291,14 +294,27 @@ input:checked + .slider:before {
 
 .techReadout{
   text-align: left;
-  margin-top: 30px;
+  margin-top: 35px;
   margin-left: 15px;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: light;
+}
+
+.techAdditionalInfo{
+  display: none;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  height: 40px;
+  color: black;
+  border: none;
+  background-color: var(--light-gray);
+  justify-content: center;
+  vertical-align: middle;
+  z-index: 2;
 }
 
 .chip{
-  font-size: 14px;
+  font-size: 12px;
   color: white;
   border-radius: 15px;
   height: min-content;
@@ -307,23 +323,52 @@ input:checked + .slider:before {
   margin-right: 15px;
   cursor: pointer;
   padding: 7px;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
 }
 
-.chipAwin{
-  white-space: nowrap;
-  background-color: #18a45b;
+.chip:hover {
+  border-color: #ff6600b0;
 }
+
+.chipAwin {
+  white-space: nowrap;
+  background: linear-gradient(
+    270deg,
+    #de0732 0%,
+    #FF6600 20%,
+    #fab418 50%,
+    #DE0732 100%
+
+  );
+  background-size: 400% 100%;
+  animation: scrollGradient 15s linear infinite;
+  color: white;
+}
+
+@keyframes scrollGradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: -50% 0%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
 
 .chipEasy{
   background-color: #18a45b;
 }
 
 .chipModerate{
-  background-color: #d8a037;
+  background-color: #d99b15;
 }
 
 .chipDifficult{
-  background-color: #d83939;
+  background-color: #DE0732;
 }
 
 .ratingDiv{
@@ -360,40 +405,42 @@ hr.solid {
 
 /* Collapsibles */
 .collapsible {
-  color: black;
-  background-color: #dfdfdf;
-  cursor: pointer;
-  padding-left: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
   height: 40px;
   width: 100%;
   border: none;
-  vertical-align: middle;
-  text-align: left;
-  outline: none;
+  font-weight: regular;
   font-size: 14px;
-  transition: 0.2s;
-  margin-top: 3px;
-  margin-bottom: 3px;
+  background-color: #dfdfdf;
+  color: black;
   border-radius: 5px;
-  box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.2); /* Horizontal offset, Vertical offset, Blur radius, Color */
+  margin-top: 5px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.2);
 }
 
-.active, .collapsible:hover {
-  color: white;
+.collapsible:hover,
+.collapsible.active {
   background-color: var(--dark-orange);
+  color: white;
 }
 
-.collapsible:after {
-  color: transparent;
-  text-shadow: 0 0 0 #5e5e5e;
-  content: '\02795'; /* Unicode character for "plus" sign (+) */
-  font-size: 13px;
-  float: right;
-  margin-left: 5px;
+.collapsible-icon {
+  font-size: 14px;
+  font-weight: bold;
+  position: relative;
+  top: 0px;
+  color: black;
+  transition: color 0.2s;
 }
 
-.active:after {
-  content: "\2796"; /* Unicode character for "minus" sign (-) */
+.collapsible.active .collapsible-icon {
+  color: white;
 }
 
 .collapse-content {
@@ -429,7 +476,7 @@ hr.solid {
 }
 
 .append-button:hover{
-  color: #424242;
+  color: white;
   background-color: var(--orange);
   border: 1.9px solid var(--orange);
   cursor:pointer;
@@ -535,9 +582,9 @@ input[type="text"]#opBox {
 .st5{fill:#CC1D46;}
 
 :root{
-  --light-orange: #ffad77;
-  --orange: #fc8e45;
-  --high-orange: #ff6600;
+  --light-orange: #FF9550;
+  --orange: #FF7D28;
+  --high-orange: #FF6600;
   --dark-orange: #fc8e45;
   --light-gray: #e0e0e0;
   --dark-gray: #242424;

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 	<head>
 		<meta charset="UTF-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,9 +7,9 @@
 	  
 		<link rel="icon" href="assets/icon.png" />
 		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="styles/fonts.css">
 	  
 		<title>Awin Helper</title>
-		<script src="popup.js"></script>
 	</head>
 	<body>
 		<div class="headerContainer">
@@ -40,7 +39,7 @@
 				  </label>
 			</div>
 		</div>
-
+		<script src="popup.js"></script>
 		<div class="extBody">
 			<div class="leftContainer">
 				<div class="siteInfoDiv">
@@ -54,8 +53,6 @@
 					</div>
 				</div>
 
-				<script src="scripts/URLandMT.js"></script>
-
 				<fieldset class="field_set" id="clipboard">
 					<div class="clipDiv">
 						<input type="text" id="clipMID" placeholder="Merchant ID" class="clipInput">
@@ -66,7 +63,10 @@
 				</fieldset>
 				<script src="/scripts/clipSaver.js"></script>
 
-				<button type="button" class="collapsible" id="newImplView">New Implementation</button>
+				<button class="collapsible" id="newImplView">
+					<span class="collapsible-label">New Implementation</span>
+					<span class="collapsible-icon">+</span>
+				</button>
 					<div class="collapse-content">
 						<body class="upper">
 							<p>Please enter the new MID.</p>
@@ -80,7 +80,10 @@
 					</div>
 				<script src="/scripts/newImpl.js"></script>
 
-				<button type="button" class="collapsible" id="intReviewView">Internal Review</button>
+				<button class="collapsible" id="intReviewView">
+					<span class="collapsible-label">Internal Review</span>
+					<span class="collapsible-icon">+</span>
+				</button>	
 					<div class="collapse-content">
 						<body class="upper">
 							<p>Please enter an MID.</p>
@@ -94,7 +97,10 @@
 					</div>
 				<script src="/scripts/internalReview.js"></script>
 
-				<button type="button" class="collapsible" id="testURLTech">Test URL Generator</button>
+				<button class="collapsible" id="testURLTech">
+					<span class="collapsible-label">Test URL Generator</span>
+					<span class="collapsible-icon">+</span>
+				</button>				  
 					<div class="collapse-content">
 						<body class="upper">
 							<p>Enter an MID to generate a test URL.</p>
@@ -161,6 +167,9 @@
 						<p class="techReadout">Shopify</p>
 					</div>
 					<span class="chip chipEasy" id="shopifyChip">Easy</span>
+				</div>
+				<div class="techAdditionalInfo" id="myShopifyInfo">
+					<p class="techAdditionalText" id="myShopifyText"></p>
 				</div>
 				<div class="techDisplay" id="wooCommDisplay">
 					<div class="techIcon">
