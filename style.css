@@ -294,7 +294,7 @@ input:checked + .slider:before {
 
 .techReadout{
   text-align: left;
-  margin-top: 30px;
+  margin-top: 35px;
   margin-left: 15px;
   font-size: 14px;
   font-weight: light;
