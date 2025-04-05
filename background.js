@@ -17,10 +17,6 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.elementId) {
-    console.log('Element interaction received:', request.elementId); // Log the received element ID
-    reportElementInteraction(request.elementId);
-  }
   if (request.getVersion) {
     // Send the version from manifest.json to the popup script
     const manifestData = chrome.runtime.getManifest();
