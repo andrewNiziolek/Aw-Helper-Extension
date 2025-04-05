@@ -37,15 +37,38 @@ chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
           return false;
         };
 
-        const checkShopify = () => {
-          const scripts = document.getElementsByTagName("script");
-          for (let i = 0; i < scripts.length; i++) {
-            if(scripts[i].src.includes("myshopify.com")) {
-              return true;
-            }
-          }
-          return false;
-        };
+        const waitForShopify = (timeout = 5) => {
+          return new Promise(resolve => {
+            const start = Date.now();
+        
+            const extractShopFromInlineScripts = () => {
+              const scripts = document.getElementsByTagName("script");
+              const regex = /Shopify\.shop\s*=\s*["']([^"']+)["']/;
+        
+              for (let i = 0; i < scripts.length; i++) {
+                const content = scripts[i].innerText || scripts[i].textContent;
+                const match = content && content.match(regex);
+                if (match) {
+                  return match[1];
+                }
+              }
+              return "";
+            };
+        
+            const check = () => {
+              const shop = extractShopFromInlineScripts();
+              if (shop) {
+                resolve(shop);
+              } else if (Date.now() - start < timeout) {
+                requestAnimationFrame(check);
+              } else {
+                resolve(""); // timeout fallback
+              }
+            };
+        
+            check();
+          });
+        };               
 
         const checkWooComm = () => {
           const scripts = document.getElementsByTagName("script");
@@ -76,9 +99,26 @@ chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
           chrome.runtime.sendMessage({status: "GTSS Found"});
         }
 
-        if (checkShopify()) {
-          chrome.runtime.sendMessage({status: "Shopify Detected"});
+        let detected = false;
+        const scripts = document.getElementsByTagName("script");
+        for (let i = 0; i < scripts.length; i++) {
+          if (scripts[i].src.includes("myshopify.com")) {
+            detected = true;
+            break;
+          }
         }
+
+        waitForShopify().then((shopDomain) => {
+          console.log("Resolved Shopify.shop:", shopDomain);
+          if (detected || shopDomain) {
+            chrome.runtime.sendMessage({
+              status: "Shopify Detected",
+              shopifyDomain: shopDomain || ""
+            });
+          }
+        });
+
+
 
         if (checkWooComm()) {
           chrome.runtime.sendMessage({status: "WooCommerce Detected"});
@@ -158,10 +198,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.status === "Shopify Detected") {
     const shopifyPanel = document.getElementById("shopifyDisplay");
+    const shopifyChip = document.getElementById("shopifyChip");
+    const myShopifyPanel = document.getElementById("myShopifyInfo");
+    const myshopifyText = document.getElementById("myShopifyText");
+  
     if (shopifyPanel) {
       shopifyPanel.style.display = 'grid';
-    } 
+      myShopifyPanel.style.display = 'grid';
+  
+      if (request.shopifyDomain && myshopifyText) {
+        myshopifyText.textContent = request.shopifyDomain;
+      }
+    }
   }
+  
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
