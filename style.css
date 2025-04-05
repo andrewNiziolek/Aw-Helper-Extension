@@ -323,12 +323,41 @@ input:checked + .slider:before {
   margin-right: 15px;
   cursor: pointer;
   padding: 7px;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
 }
 
-.chipAwin{
-  white-space: nowrap;
-  background-color: #18a45b;
+.chip:hover {
+  border-color: #ff6600b0;
 }
+
+.chipAwin {
+  white-space: nowrap;
+  background: linear-gradient(
+    270deg,
+    #de0732 0%,
+    #FF6600 20%,
+    #fab418 50%,
+    #DE0732 100%
+
+  );
+  background-size: 400% 100%;
+  animation: scrollGradient 15s linear infinite;
+  color: white;
+}
+
+@keyframes scrollGradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: -50% 0%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
 
 .chipEasy{
   background-color: #18a45b;
@@ -555,7 +584,7 @@ input[type="text"]#opBox {
 :root{
   --light-orange: #FF9550;
   --orange: #FF7D28;
-  --high-orange: #FF6501;
+  --high-orange: #FF6600;
   --dark-orange: #fc8e45;
   --light-gray: #e0e0e0;
   --dark-gray: #242424;
