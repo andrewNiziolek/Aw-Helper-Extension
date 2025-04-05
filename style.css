@@ -364,11 +364,11 @@ input:checked + .slider:before {
 }
 
 .chipModerate{
-  background-color: #d8a037;
+  background-color: #d99b15;
 }
 
 .chipDifficult{
-  background-color: #d83939;
+  background-color: #DE0732;
 }
 
 .ratingDiv{
