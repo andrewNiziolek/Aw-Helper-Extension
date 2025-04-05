@@ -360,40 +360,42 @@ hr.solid {
 
 /* Collapsibles */
 .collapsible {
-  color: black;
-  background-color: #dfdfdf;
-  cursor: pointer;
-  padding-left: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
   height: 40px;
   width: 100%;
   border: none;
-  vertical-align: middle;
-  text-align: left;
-  outline: none;
   font-size: 14px;
-  transition: 0.2s;
-  margin-top: 3px;
-  margin-bottom: 3px;
+  background-color: #dfdfdf;
+  color: black;
   border-radius: 5px;
-  box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.2); /* Horizontal offset, Vertical offset, Blur radius, Color */
+  margin-top: 5px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.2);
 }
 
-.active, .collapsible:hover {
-  color: white;
+.collapsible:hover,
+.collapsible.active {
   background-color: var(--dark-orange);
+  color: white;
 }
 
-.collapsible:after {
-  color: transparent;
-  text-shadow: 0 0 0 #5e5e5e;
-  content: '\02795'; /* Unicode character for "plus" sign (+) */
-  font-size: 13px;
-  float: right;
-  margin-left: 5px;
+.collapsible-icon {
+  font-size: 14px;
+  font-weight: bold;
+  font-family: Tahoma, sans-serif;
+  position: relative;
+  top: 0px;
+  color: black;
+  transition: color 0.2s;
 }
 
-.active:after {
-  content: "\2796"; /* Unicode character for "minus" sign (-) */
+.collapsible.active .collapsible-icon {
+  color: white;
 }
 
 .collapse-content {
@@ -429,7 +431,7 @@ hr.solid {
 }
 
 .append-button:hover{
-  color: #424242;
+  color: white;
   background-color: var(--orange);
   border: 1.9px solid var(--orange);
   cursor:pointer;
@@ -535,9 +537,9 @@ input[type="text"]#opBox {
 .st5{fill:#CC1D46;}
 
 :root{
-  --light-orange: #ffad77;
-  --orange: #fc8e45;
-  --high-orange: #ff6600;
+  --light-orange: #FF9550;
+  --orange: #FF7D28;
+  --high-orange: #FF6501;
   --dark-orange: #fc8e45;
   --light-gray: #e0e0e0;
   --dark-gray: #242424;
