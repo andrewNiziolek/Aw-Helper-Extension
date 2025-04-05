@@ -14,6 +14,20 @@ attriBtn.addEventListener("click", function(){
   openGitURL(URL);
 });
 
+// Personal Attribution Link
+const perSiteBtn = document.getElementById("personalAttrib");
+function openPersonalAttribURL(URL) {
+  URL.forEach((url) => {
+        chrome.tabs.create({ url });
+    });
+};
+
+perSiteBtn.addEventListener("click", function() {
+    const URL = [`https://www.andrewniziolek.com/?utm_source=awhelper&utm_medium=extension&utm_campaign=personal_attribution`];
+
+    openPersonalAttribURL(URL);
+});
+
 // DO NOT CHANGE the way that this system works. I've attempted to nest these
 // functions and have not been able to get it functioning.
 chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
