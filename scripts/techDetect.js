@@ -6,7 +6,24 @@ chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
     "microsoftedge", "force.com"
   ];
 
-  if (blocklist.some(domain => url.includes(domain))) return;
+  const compatText = document.getElementById("compatData");
+  const siteURLText = document.getElementById("siteURLText");
+
+  if (blocklist.some(domain => url.includes(domain))) {
+    if (compatText) {
+      compatText.textContent = "Restricted URL";
+      compatText.style.fontStyle = "italic";
+    }
+    if (siteURLText) siteURLText.textContent = "Restricted URL";
+    return;
+  }
+
+  // Set domain text
+  const getDomain = (url) => {
+    let domain = url.split('//')[1] || url;
+    return domain.split('/')[0];
+  };
+  if (siteURLText) siteURLText.textContent = getDomain(url);
 
   chrome.scripting.executeScript({
     target: { tabId: tabs[0].id },
@@ -56,12 +73,30 @@ chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 
       const checkPresence = (keyword) => getScripts().some(script => script.src.includes(keyword));
 
+      const checkDWIN = () => {
+        const scripts = getScripts();
+        const masterTags = [];
+        const regex = /([^/]*).js(\?.*)?$/gm;
+        for (const script of scripts) {
+          if (script.src.includes("dwin1.com")) {
+            const match = regex.exec(script.src);
+            regex.lastIndex = 0;
+            if (match) masterTags.push(match[1]);
+          }
+        }
+        if (masterTags.length > 0) {
+          chrome.runtime.sendMessage({ masterTags });
+        }
+      };
+
+      // Run detections
       checkGTM();
       checkGTSS();
+      checkDWIN();
 
-      let detected = checkPresence("myshopify.com");
+      const isShopify = checkPresence("myshopify.com");
       waitForShopify().then(shopDomain => {
-        if (detected || shopDomain) {
+        if (isShopify || shopDomain) {
           chrome.runtime.sendMessage({
             status: "Shopify Detected",
             shopifyDomain: shopDomain || ""
@@ -80,11 +115,12 @@ chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
   });
 });
 
+// Unified runtime listener
 const modeCheck = document.getElementById("modeSwitch");
 
 chrome.runtime.onMessage.addListener((request) => {
   try {
-    const { status, shopifyDomain } = request;
+    const { status, shopifyDomain, masterTags } = request;
 
     const show = (id, text = null) => {
       const panel = document.getElementById(id);
@@ -97,7 +133,7 @@ chrome.runtime.onMessage.addListener((request) => {
       }
     };
 
-    if (!modeCheck.checked && status && /(GTM|WooCommerce|Shopify)/.test(status)) {
+    if (!modeCheck?.checked && status && /(GTM|WooCommerce|Shopify)/.test(status)) {
       const compatText = document.getElementById("compatData");
       const easeMSG = document.getElementById("ratingBox");
       if (compatText && easeMSG) {
@@ -108,11 +144,11 @@ chrome.runtime.onMessage.addListener((request) => {
       }
     }
 
-    if (status.includes("GTM")) {
+    if (status?.includes("GTM")) {
       show("gtmDisplay", { id: "gtmText", value: status });
     }
 
-    if (status.startsWith("GTSS")) {
+    if (status?.startsWith("GTSS")) {
       show("gtSSDisplay", { id: "gtSSText", value: "GTM Server-Side" });
     }
 
@@ -129,7 +165,23 @@ chrome.runtime.onMessage.addListener((request) => {
       show("wooCommDisplay", { id: "wooCommStatus", value: "WooCommerce" });
     }
 
+    if (masterTags?.length > 0) {
+      const [firstTag, ...rest] = masterTags;
+      const message = rest.length ? `${firstTag} +${rest.length}` : firstTag;
+      const tooltipText = rest.join(", ");
+      const dwin1Status = document.getElementById("awcChip");
+      const awinPanel = document.getElementById("awcDisplay");
+      if (dwin1Status && awinPanel) {
+        dwin1Status.textContent = message;
+        awinPanel.style.display = "grid";
+        if (tooltipText) {
+          dwin1Status.setAttribute("data-tooltip", tooltipText);
+          dwin1Status.classList.add("tooltip");
+        }
+      }
+    }
+
   } catch (error) {
-    console.log("Error in onMessage listener:", error);
+    console.error("Error in unified runtime listener:", error);
   }
 });
