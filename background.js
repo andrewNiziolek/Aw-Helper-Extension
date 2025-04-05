@@ -1,18 +1,5 @@
-// Import the analytics script
-importScripts('./scripts/analytics.js');
-
 // Variable to control whether the update popup should open
 let disableUpdatePopup = "0"; // Set to "1" to disable, "0" to enable
-
-// Function to report element interactions
-async function reportElementInteraction(elementId) {
-  await analytics.fireEvent('element_interaction', { element_id: elementId });
-}
-
-// Event listener for unhandled rejections
-addEventListener('unhandledrejection', async (event) => {
-  analytics.fireErrorEvent(event.reason);
-});
 
 // Event listener for when the extension is installed or updated
 chrome.runtime.onInstalled.addListener((details) => {
@@ -26,9 +13,6 @@ chrome.runtime.onInstalled.addListener((details) => {
         });
       });
     });
-    analytics.fireEvent('update'); // Optional: Log the update event
-  } else if (details.reason === 'install') {
-    analytics.fireEvent('install');
   }
 });
 
