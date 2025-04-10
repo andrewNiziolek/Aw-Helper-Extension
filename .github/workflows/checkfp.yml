@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 12 * * *' # Every day at 12:00 UTC
   workflow_dispatch:
-  
+
 permissions:
   contents: read
   issues: write
@@ -31,8 +31,6 @@ jobs:
 
           if [ "$MATCHES" -gt 0 ]; then
             jq -r '.items[] | "- " + .repository.full_name + ": " + .html_url' results.json > matches.txt
-          else
-            echo "No matches found." > matches.txt
           fi
 
       - name: Upload results to workflow summary
@@ -40,7 +38,12 @@ jobs:
           echo "### 🧬 Awin Helper Fingerprint Scan" >> $GITHUB_STEP_SUMMARY
           echo "Fingerprint searched: \`${{ env.FINGERPRINT }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          cat matches.txt >> $GITHUB_STEP_SUMMARY
+
+          if [ -f matches.txt ]; then
+            cat matches.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No matches found." >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Create GitHub issue if matches found
         if: steps.search.outputs.matches != '0'
