@@ -1,4 +1,9 @@
 console.log('Content script loaded');
+window.__awin_helper_meta = {
+  by: 'Andrew Niziolek',
+  license: 'AGPL-3.0',
+  fingerprint: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+};
 
 // Update version in the popup
 chrome.runtime.sendMessage({ getVersion: true }, (response) => {
@@ -32,3 +37,12 @@ const openPersonalAttribURL = () => {
 
 document.getElementById("attribText")?.addEventListener("click", openGitURL);
 document.getElementById("personalAttrib")?.addEventListener("click", openPersonalAttribURL);
+
+/**
+ * Awin Helper
+ * Copyright (c) 2025 Andrew Niziolek
+ * Licensed under AGPL-3.0
+ * https://www.gnu.org/licenses/agpl-3.0.html
+ * https://github.com/andrewNiziolek/Aw-Helper-Extension
+ * Fingerprint: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+ */

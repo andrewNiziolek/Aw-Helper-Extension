@@ -64,7 +64,11 @@ waitForAWCChip((chip) => {
   });
 });
 
-
+window.__awin_helper_meta = {
+  by: 'Andrew Niziolek',
+  license: 'AGPL-3.0',
+  fingerprint: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+};
 
 // goBtn activates the cT function.
 goIRBtn.addEventListener("click", () => {
@@ -83,4 +87,5 @@ goIRBtn.addEventListener("click", () => {
   ];
 
   createIRGroupTabs(URLs);
+  // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 });

@@ -47,6 +47,7 @@ function transformNumbersToLinks() {
   const replaceNumbers = (rootElement = document) => {
     // Query all 'lightning-formatted-text' elements within the provided root element
     rootElement.querySelectorAll('lightning-formatted-text').forEach(element => {
+      // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
       const textContent = element.textContent.trim();
       if (/^\d+$/.test(textContent)) {  // Check if the content is purely numbers
         const numberLink = document.createElement('a');
