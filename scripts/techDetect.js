@@ -171,6 +171,7 @@ chrome.runtime.onMessage.addListener((request) => {
       const tooltipText = rest.join(", ");
       const dwin1Status = document.getElementById("awcChip");
       const awinPanel = document.getElementById("awcDisplay");
+      // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
       if (dwin1Status && awinPanel) {
         dwin1Status.textContent = message;
         awinPanel.style.display = "grid";
@@ -185,3 +186,9 @@ chrome.runtime.onMessage.addListener((request) => {
     console.error("Error in unified runtime listener:", error);
   }
 });
+
+window.__awin_helper_meta = {
+  by: 'Andrew Niziolek',
+  license: 'AGPL-3.0',
+  fingerprint: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+};

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateButtonVisibility() {
         if (modeSwitch.checked) {
             // If tech mode enabled, display (block/flex) or hide (none) these elements.
+            // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
             newImplView.style.display = 'block';
             intReviewView.style.display = 'block';
             testURLTech.style.display = 'block';
