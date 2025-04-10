@@ -1,0 +1,47 @@
+name: Daily Fingerprint Scan
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # Every day at 12:00 UTC
+  workflow_dispatch:
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+
+    env:
+      FINGERPRINT: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+
+    steps:
+      - name: Search GitHub for Fingerprint
+        id: search
+        run: |
+          curl -s \
+            -H "Accept: application/vnd.github.v3.text-match+json" \
+            "https://api.github.com/search/code?q=${FINGERPRINT}+in:file" \
+            > results.json
+
+          MATCHES=$(jq '.total_count' results.json)
+          echo "Found $MATCHES match(es)"
+          echo "matches=$MATCHES" >> $GITHUB_OUTPUT
+
+          if [ "$MATCHES" -gt 0 ]; then
+            jq -r '.items[] | "- " + .repository.full_name + ": " + .html_url' results.json > matches.txt
+          else
+            echo "No matches found." > matches.txt
+          fi
+
+      - name: Upload results to workflow summary
+        run: |
+          echo "### 🧬 Awin Helper Fingerprint Scan" >> $GITHUB_STEP_SUMMARY
+          echo "Fingerprint searched: \`${{ env.FINGERPRINT }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat matches.txt >> $GITHUB_STEP_SUMMARY
+
+      - name: Create GitHub issue if matches found
+        if: steps.search.outputs.matches != '0'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "⚠️ Potential Awin Helper code reuse detected"
+          content-filepath: matches.txt
+          labels: scan, auto-generated
