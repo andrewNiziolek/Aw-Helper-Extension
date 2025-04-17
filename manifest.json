@@ -30,5 +30,22 @@
   [
     "http://*/",
     "https://*/"
+  ],
+
+  "web_accessible_resources": [
+  {
+    "resources": ["scripts/injected.js", "assets/icon48.png"],
+    "matches": ["<all_urls>"]
+  }
+  ],
+
+  "content_scripts": [
+  {
+    "matches": ["https://*.lightning.force.com/*"],
+    "js": ["scripts/bootstrap.js"],
+    "type": "module",
+    "run_at": "document_idle"
+  }
   ]
+
 }
