@@ -16,7 +16,6 @@
 
   // --- Utilities ---
   function getCaseIdFromPath() {
-    // Matches paths like: /lightning/r/Case/500.../view
     const match = window.location.pathname.match(/\/lightning\/r\/Case\/([a-zA-Z0-9]{15,18})\/view/); // More specific ID match
     return match ? match[1] : null;
   }
@@ -26,7 +25,6 @@
       try {
         // Use dynamic import to load the module
         injectionModule = await import(chrome.runtime.getURL('scripts/injected.js'));
-        console.log('[Awin Helper] Injected script module loaded.');
         // Check if necessary functions exist
         if (!injectionModule.findMidOnPage || !injectionModule.injectCasePanelOnce || !injectionModule.removeCasePanel) {
              console.error('[Awin Helper] Critical Error: Required functions (findMidOnPage, injectCasePanelOnce, removeCasePanel) not found in injected.js module.');
@@ -41,7 +39,7 @@
     return injectionModule;
   }
 
-  // --- Core Logic (Handler for Observer/Initial Check) ---
+  //Core Logic (Handler for Observer/Initial Check)
   async function handleStateChange() {
     // Prevent multiple simultaneous runs caused by rapid mutations
     if (isHandling) {
@@ -49,23 +47,22 @@
         return;
     }
     isHandling = true;
-    console.log('[Awin Helper] Handling state change...');
 
     const mod = await loadInjectionModule();
     if (!mod) {
       console.warn('[Awin Helper] Injection module not available. Aborting state check.');
       isHandling = false;
-      return; // Cannot proceed without the module
+      return;
     }
 
     const caseIdOnPage = getCaseIdFromPath();
 
     try {
-      // --- Scenario 1: We are on a Case Page ---
+      //Scenario 1: We are on a Case Page
       if (caseIdOnPage) {
         // If the panel isn't injected OR it's injected for the wrong case
         if (currentInjectedCaseId !== caseIdOnPage) {
-          console.log(`[Awin Helper] State change detected: Need panel for Case ${caseIdOnPage}. Current injected: ${currentInjectedCaseId}`);
+          console.log(`[Awin Helper] State change detected: Need panel for Case ${caseIdOnPage}.`);
 
           // Remove any existing panel first (important when switching cases)
           if (currentInjectedCaseId !== null) {
@@ -74,11 +71,10 @@
           }
           currentInjectedCaseId = null; // Panel is conceptually gone, even if removal fails momentarily
 
-          // --- Find MID asynchronously ---
-          console.log(`[Awin Helper] Starting MID search for case: ${caseIdOnPage}`);
+          //Find MID
           const mid = await mod.findMidOnPage(); // This now handles the waiting
 
-          // --- Inject panel with found MID ---
+          //Inject panel with found MID
           if (getCaseIdFromPath() !== caseIdOnPage) {
              console.warn(`[Awin Helper] User navigated away from Case ${caseIdOnPage} during MID search. Aborting injection.`);
              isHandling = false;
@@ -93,14 +89,12 @@
             currentInjectedCaseId = caseIdOnPage; // Update state *only on successful injection*
           } else {
             console.warn(`[Awin Helper] Injection attempt failed for case: ${caseIdOnPage}. Panel anchor might not be ready yet. Will retry on next relevant mutation.`);
-            // No complex retry needed here; the observer will trigger again if the DOM changes facilitate injection.
             currentInjectedCaseId = null; // Ensure we retry injection next time if it failed
           }
         } else {
-          // console.log(`[Awin Helper] State check: Panel already correctly injected for case ${caseIdOnPage}. No action needed.`);
         }
       }
-      // --- Scenario 2: We are NOT on a Case Page ---
+      //Scenario 2: We are NOT on a Case Page
       else {
         // If a panel *is* currently injected, remove it
         if (currentInjectedCaseId !== null) {
@@ -136,8 +130,6 @@
     }
     const nodeToObserve = targetNode || document.body;
 
-    console.log(`[Awin Helper] Starting MutationObserver on:`, nodeToObserve);
-
     observer = new MutationObserver((mutationsList, obs) => {
       // Debounce the handler: Wait for mutations to "settle" before acting.
       clearTimeout(handleTimeout);
@@ -149,19 +141,12 @@
       subtree: true    // Observe descendants as well (crucial for SPAs)
     });
 
-    // Perform an initial check shortly after the observer starts,
-    // ensuring it runs after the debounce delay allows potential initial mutations to settle.
-    console.log('[Awin Helper] Scheduling initial state check.');
-    setTimeout(handleStateChange, HANDLE_DELAY_MS + 200); // Run slightly after observer debounce time
+    // Perform an initial check shortly after the observer starts.
+    setTimeout(handleStateChange, HANDLE_DELAY_MS + 200);
   }
 
-  // --- Initialization ---
+  // Initialization
   // Delay observer setup slightly to allow initial page elements to settle
-  console.log(`[Awin Helper] Scheduling observer setup in ${OBSERVER_START_DELAY_MS}ms...`);
   setTimeout(startObserver, OBSERVER_START_DELAY_MS);
-
-  // Optional: Listen for history changes explicitly (might be redundant with MutationObserver but can sometimes catch SPA navigations faster)
-  // window.addEventListener('popstate', handleStateChange); // Handle browser back/forward
-  // Potentially override pushState/replaceState if needed, but MutationObserver is often sufficient for element changes.
 
 })();

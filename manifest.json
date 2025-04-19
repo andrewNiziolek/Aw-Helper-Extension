@@ -34,18 +34,20 @@
 
   "web_accessible_resources": [
   {
-    "resources": ["scripts/injected.js", "assets/icon48.png", "assets/sfpanel.css"],
+    "resources": ["scripts/injected.js", "assets/icon48.png", "css/sfpanel.css", "css/panel-global.css"],
     "matches": ["*://*.lightning.force.com/*"]
   }
   ],
 
   "content_scripts": [
-  {
-    "matches": ["https://*.lightning.force.com/*"],
-    "js": ["scripts/bootstrap.js"],
-    "type": "module",
-    "run_at": "document_idle"
-  }
+    {
+      "matches": ["*://*.lightning.force.com/*"],
+      "css": [
+        "css/panel-global.css"
+      ],
+      "js": ["scripts/bootstrap.js"],
+      "run_at": "document_idle"
+    }
   ]
 
 }

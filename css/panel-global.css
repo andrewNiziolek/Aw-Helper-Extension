@@ -1,0 +1,61 @@
+@keyframes scrollGradient {
+0% {
+    background-position: 100% 50%;
+}
+100% {
+    background-position: 0% 50%;
+}
+}
+
+/* Style for the Awin Helper Panel HEADER */
+#awin-helper-panel .slds-card__header {
+background: linear-gradient(
+    270deg,
+    #de0732 0%,
+    #ff6600 20%,
+    #fab418 50%,
+    #de0732 100%
+);
+background-size: 400% 100%;
+animation: scrollGradient 15s linear infinite;
+color: white;
+border-radius: var(--lwc-borderRadiusMedium, 0.25rem) var(--lwc-borderRadiusMedium, 0.25rem) 0 0;
+
+/* Ensure the background gradient respects the border radius */
+overflow: hidden;
+
+/* Optional: Adjust padding if needed, SLDS default might be fine */
+padding: var(--lwc-spacingSmall, 1rem);
+}
+
+#awin-helper-panel .slds-card__header .slds-text-heading_small {
+color: white;
+font-weight: bold; /* Example: make title bold */
+}
+
+#awin-helper-panel .slds-card__header .slds-assistive-text {
+position: absolute !important;
+width: 1px !important;
+height: 1px !important;
+padding: 0 !important;
+margin: -1px !important; /* Move off-screen */
+overflow: hidden !important;
+clip: rect(0, 0, 0, 0) !important;
+white-space: nowrap !important;
+border: 0 !important;
+}
+
+#awin-helper-panel .awin-helper-mid-display {
+    /* Your styles here */
+    margin-top: 0.1rem; /* Add a small space below the title */
+    line-height: 1.2;   /* Adjust line height if needed */
+    font-style: italic; /* Example: Make it italic */
+    color: white;
+    /* color: #54698d; */ /* Example: Override SLDS weak color if desired */
+    /* font-size: 0.75rem; */ /* Example: Override SLDS small size if desired */
+  }
+  
+  /* Optional: Hide if it has no text (alternative to inline style) */
+  #awin-helper-panel .awin-helper-mid-display:empty {
+    display: none;
+  }
