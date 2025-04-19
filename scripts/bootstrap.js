@@ -1,243 +1,167 @@
 // --- bootstrap.js ---
 (() => {
   // --- Configuration ---
-  const OBSERVER_TARGET_SELECTOR = '.oneCenterStage'; // High-level container
-  const CHECK_INTERVAL_MS = 400;
-  const CHECK_TIMEOUT_MS = 10000;
-  const OBSERVER_START_DELAY_MS = 700;
+  const OBSERVER_TARGET_SELECTOR = '.oneCenterStage'; // Monitor the main content area where case details load
+  const OBSERVER_START_DELAY_MS = 1000; // Slightly longer delay to allow initial Salesforce load
+  const HANDLE_DELAY_MS = 400; // Debounce/delay for handling mutations (adjust based on how quickly SF updates)
 
-  // --- State Variables ---
-  let lastProcessedCaseId = null;
-  let targetCaseId = null; // The case ID we are *currently* trying to inject for
-  let needsInjectionCheck = false;
-  let checkIntervalId = null;
-  let checkStartTime = 0;
+  // --- State ---
+  let currentInjectedCaseId = null; // Track the case ID for which the panel is currently injected
   let injectionModule = null;
   let observer = null;
+  let handleTimeout = null;
+  let isHandling = false; // Flag to prevent concurrent executions of handleStateChange
 
-  console.log('[Awin Helper] Bootstrapper v4.2 (Prioritize Removal) initializing...');
+  console.log('[Awin Helper] Bootstrapper v5.1 (Async MID Fetch) initializing...');
 
+  // --- Utilities ---
   function getCaseIdFromPath() {
-    const match = window.location.pathname.match(/\/lightning\/r\/Case\/([^/]+)\/view/);
+    // Matches paths like: /lightning/r/Case/500.../view
+    const match = window.location.pathname.match(/\/lightning\/r\/Case\/([a-zA-Z0-9]{15,18})\/view/); // More specific ID match
     return match ? match[1] : null;
   }
 
   async function loadInjectionModule() {
     if (!injectionModule) {
       try {
+        // Use dynamic import to load the module
         injectionModule = await import(chrome.runtime.getURL('scripts/injected.js'));
         console.log('[Awin Helper] Injected script module loaded.');
+        // Check if necessary functions exist
+        if (!injectionModule.findMidOnPage || !injectionModule.injectCasePanelOnce || !injectionModule.removeCasePanel) {
+             console.error('[Awin Helper] Critical Error: Required functions (findMidOnPage, injectCasePanelOnce, removeCasePanel) not found in injected.js module.');
+             injectionModule = null; // Invalidate module
+             return null;
+        }
       } catch (error) {
         console.error('[Awin Helper] Failed to load injected script module:', error);
-        injectionModule = null;
+        injectionModule = null; // Reset on failure
       }
     }
     return injectionModule;
   }
 
-  // Helper function to attempt removal
-  async function tryRemovePanel(caller = "unknown") {
-      // console.log(`[Awin Helper] tryRemovePanel called by: ${caller}`); // Debug log
-      const mod = await loadInjectionModule(); // Ensure module is loaded
-      if (mod && mod.removeCasePanel) {
-          try {
-              // console.log('[Awin Helper] Attempting removal via removeCasePanel()');
-              mod.removeCasePanel(); // Call the exported function
-          } catch(e) {
-              console.error('[Awin Helper] Error calling removeCasePanel():', e);
-          }
-      } else {
-          // Fallback if module/function isn't available
-          try {
-              const existingPanel = document.getElementById('awin-helper-panel');
-              if (existingPanel) {
-                  console.log('[Awin Helper] Attempting removal via direct getElementById');
-                  existingPanel.remove();
-              } else {
-                // console.log('[Awin Helper] Removal check: No panel found directly.');
-              }
-          } catch (e) {
-             console.error('[Awin Helper] Error removing panel directly:', e);
-          }
-      }
-  }
-
-
-  // Tries to inject *once*. Called by the interval.
-  async function attemptSingleInjection(expectedCaseId) {
-    if (getCaseIdFromPath() !== expectedCaseId) {
-        // console.log(`[Awin Helper] attemptSingleInjection: Case ID mismatch. Aborting for ${expectedCaseId}.`);
-        stopInjectionCheck("stale target");
-        return false;
+  // --- Core Logic (Handler for Observer/Initial Check) ---
+  async function handleStateChange() {
+    // Prevent multiple simultaneous runs caused by rapid mutations
+    if (isHandling) {
+        console.log('[Awin Helper] State change handling already in progress. Skipping.');
+        return;
     }
+    isHandling = true;
+    console.log('[Awin Helper] Handling state change...');
 
     const mod = await loadInjectionModule();
-    if (!mod || !mod.injectCasePanelOnce) {
-      console.warn('[Awin Helper] Injection module or injectCasePanelOnce function not available.');
-      stopInjectionCheck("module load fail");
-      return false;
+    if (!mod) {
+      console.warn('[Awin Helper] Injection module not available. Aborting state check.');
+      isHandling = false;
+      return; // Cannot proceed without the module
     }
+
+    const caseIdOnPage = getCaseIdFromPath();
 
     try {
-        const success = await mod.injectCasePanelOnce(); // Call the function from injected.js
-        return success; // Return the boolean result directly
-    } catch (error) {
-         console.error(`[Awin Helper] Error during injectCasePanelOnce call for ${expectedCaseId}:`, error);
-         return false; // Treat errors as failure
-    }
-  }
+      // --- Scenario 1: We are on a Case Page ---
+      if (caseIdOnPage) {
+        // If the panel isn't injected OR it's injected for the wrong case
+        if (currentInjectedCaseId !== caseIdOnPage) {
+          console.log(`[Awin Helper] State change detected: Need panel for Case ${caseIdOnPage}. Current injected: ${currentInjectedCaseId}`);
 
-  // Clean up the interval check state
-  function stopInjectionCheck(reason = "unknown") {
-      if (checkIntervalId) {
-          // console.log(`[Awin Helper] Stopping injection check interval (Reason: ${reason}).`);
-          clearInterval(checkIntervalId);
-          checkIntervalId = null;
-      }
-      needsInjectionCheck = false;
-      // Keep targetCaseId until handlePossibleNavigation explicitly clears it or sets a new one
-      checkStartTime = 0;
-  }
-
-  // Start the process of checking periodically until injection succeeds or times out
-  async function startInjectionCheck(caseId) { // Make async to await immediate attempt
-      if (checkIntervalId && targetCaseId === caseId) {
-           return; // Already checking for this exact case
-      }
-      if (checkIntervalId) {
-          stopInjectionCheck("starting new check"); // Stop previous interval if any
-      }
-
-      console.log(`[Awin Helper] Starting injection check sequence for case: ${caseId}`);
-      targetCaseId = caseId;
-      needsInjectionCheck = true;
-      checkStartTime = Date.now();
-
-      // --- Try immediately (AFTER potential removal in handlePossibleNavigation) ---
-      try {
-          const immediateSuccess = await attemptSingleInjection(targetCaseId);
-          if (!needsInjectionCheck) return; // Check if cancelled while awaiting
-
-          if (immediateSuccess) {
-                console.log(`[Awin Helper] Immediate injection successful for ${targetCaseId}.`);
-                lastProcessedCaseId = targetCaseId; // Mark as done
-                targetCaseId = null; // Clear target
-                stopInjectionCheck("immediate success");
-                return;
+          // Remove any existing panel first (important when switching cases)
+          if (currentInjectedCaseId !== null) {
+            console.log(`[Awin Helper] Removing panel for previous case: ${currentInjectedCaseId}`);
+            await mod.removeCasePanel(); // Use await if removeCasePanel is async (it's not here, but good practice)
           }
-      } catch (err) {
-          console.error("[Awin Helper] Error during immediate injection attempt:", err);
-          stopInjectionCheck("immediate attempt error");
-          targetCaseId = null;
-          return; // Don't proceed to interval if immediate attempt errored
-      }
+          currentInjectedCaseId = null; // Panel is conceptually gone, even if removal fails momentarily
 
+          // --- Find MID asynchronously ---
+          console.log(`[Awin Helper] Starting MID search for case: ${caseIdOnPage}`);
+          const mid = await mod.findMidOnPage(); // This now handles the waiting
 
-      // --- Start interval if immediate failed ---
-      if (needsInjectionCheck && !checkIntervalId) { // Check flags again
-            // console.log(`[Awin Helper] Immediate injection failed for ${targetCaseId}, starting interval check.`);
-            checkIntervalId = setInterval(async () => {
-                if (!needsInjectionCheck) {
-                    stopInjectionCheck("flag turned false in interval");
-                    return;
-                }
+          // --- Inject panel with found MID ---
+          if (getCaseIdFromPath() !== caseIdOnPage) {
+             console.warn(`[Awin Helper] User navigated away from Case ${caseIdOnPage} during MID search. Aborting injection.`);
+             isHandling = false;
+             return; // Avoid injecting if the context changed *during* the async MID search
+          }
 
-                if (Date.now() - checkStartTime > CHECK_TIMEOUT_MS) {
-                    console.warn(`[Awin Helper] Injection check TIMED OUT after ${CHECK_TIMEOUT_MS}ms for case ${targetCaseId}.`);
-                    lastProcessedCaseId = targetCaseId; // Mark as processed (timed out)
-                    targetCaseId = null;
-                    stopInjectionCheck("timeout");
-                    return;
-                }
+          console.log(`[Awin Helper] Attempting injection for case: ${caseIdOnPage} with MID: ${mid}`);
+          const success = mod.injectCasePanelOnce(mid); // Pass the found MID (or null)
 
-                const currentCaseIdNow = getCaseIdFromPath();
-                if (currentCaseIdNow !== targetCaseId) {
-                    console.log(`[Awin Helper] URL changed during interval (expected ${targetCaseId}, now ${currentCaseIdNow || 'null'}). Stopping check.`);
-                    stopInjectionCheck("URL mismatch during check");
-                    // Re-evaluate navigation immediately
-                    setTimeout(handlePossibleNavigation, 0);
-                    return;
-                }
-
-                const success = await attemptSingleInjection(targetCaseId);
-                if (success) {
-                    console.log(`[Awin Helper] Interval injection successful for ${targetCaseId}. Stopping check.`);
-                    lastProcessedCaseId = targetCaseId;
-                    targetCaseId = null;
-                    stopInjectionCheck("interval success");
-                }
-            }, CHECK_INTERVAL_MS);
-      } else if (!needsInjectionCheck) {
-           // console.log("[Awin Helper] Check cancelled before interval could start.")
-           stopInjectionCheck("cancelled before interval");
-      }
-  }
-
-
-  // Main logic triggered by observer
-  async function handlePossibleNavigation() { // Make async to allow await for removal
-    const currentCaseId = getCaseIdFromPath();
-    // console.log(`[Awin Helper] handlePossibleNavigation: Current=${currentCaseId}, LastProc=${lastProcessedCaseId}, Target=${targetCaseId}`);
-
-    // --- Case 1: On a Case Page ---
-    if (currentCaseId) {
-        if (currentCaseId !== lastProcessedCaseId && currentCaseId !== targetCaseId) {
-            // This is a NEW case ID we haven't successfully processed OR are currently targeting
-            console.log(`[Awin Helper] Navigation detected to unprocessed case: ${currentCaseId}.`);
-            stopInjectionCheck("new navigation detected"); // Stop any previous checks
-
-            // *** PRIORITIZE REMOVAL ***
-            console.log(`[Awin Helper] Attempting removal before starting check for ${currentCaseId}...`);
-            await tryRemovePanel("new case nav"); // Ensure any old panel is gone
-
-            // Now start the check sequence
-            startInjectionCheck(currentCaseId); // This is now async
+          if (success) {
+            console.log(`[Awin Helper] Injection successful for case: ${caseIdOnPage}`);
+            currentInjectedCaseId = caseIdOnPage; // Update state *only on successful injection*
+          } else {
+            console.warn(`[Awin Helper] Injection attempt failed for case: ${caseIdOnPage}. Panel anchor might not be ready yet. Will retry on next relevant mutation.`);
+            // No complex retry needed here; the observer will trigger again if the DOM changes facilitate injection.
+            currentInjectedCaseId = null; // Ensure we retry injection next time if it failed
+          }
+        } else {
+          // console.log(`[Awin Helper] State check: Panel already correctly injected for case ${caseIdOnPage}. No action needed.`);
         }
-        // Else: either already processed or currently being checked. Let interval handle it.
-    }
-    // --- Case 2: Not on a Case Page ---
-    else {
-        if (lastProcessedCaseId || targetCaseId) { // If we *were* on a case or checking for one
-             console.log(`[Awin Helper] Navigation detected AWAY from a case page (Last Proc: ${lastProcessedCaseId}, Target: ${targetCaseId}).`);
-             const oldTarget = targetCaseId;
-             stopInjectionCheck("navigated away"); // Stop any running checks
-             lastProcessedCaseId = null; // Clear the last processed case
-             targetCaseId = null; // Clear target
-
-            // Attempt removal
-            await tryRemovePanel("nav away");
+      }
+      // --- Scenario 2: We are NOT on a Case Page ---
+      else {
+        // If a panel *is* currently injected, remove it
+        if (currentInjectedCaseId !== null) {
+          console.log(`[Awin Helper] State change: Navigated away from case ${currentInjectedCaseId}. Removing panel.`);
+          await mod.removeCasePanel();
+          currentInjectedCaseId = null; // Update state
+        } else {
+          // console.log('[Awin Helper] State check: Not on a case page, no panel injected.');
         }
-        // Else: not on a case page and wasn't previously.
+      }
+    } catch (error) {
+       console.error('[Awin Helper] Error during handleStateChange:', error);
+       // Cautious reset? Maybe try removing panel just in case.
+       try { await mod?.removeCasePanel(); } catch (_) {}
+       currentInjectedCaseId = null;
+    } finally {
+        isHandling = false; // Allow next handling run
     }
   }
 
   // --- Observer Setup ---
-  let debounceTimeout;
-  const debouncedHandler = () => {
-    handlePossibleNavigation();
-  };
-
   function startObserver() {
     if (observer) {
-      observer.disconnect();
+        console.log('[Awin Helper] Disconnecting previous MutationObserver.');
+        observer.disconnect();
     }
-    const targetNode = document.querySelector(OBSERVER_TARGET_SELECTOR) || document.body;
-    console.log(`[Awin Helper] Starting MutationObserver on:`, targetNode);
+
+    const targetNode = document.querySelector(OBSERVER_TARGET_SELECTOR);
+    if (!targetNode) {
+        console.warn(`[Awin Helper] Observer target ('${OBSERVER_TARGET_SELECTOR}') not found. Using document.body. This might be inefficient.`);
+        // Fallback to body, but ideally the target selector should work
+        // Consider retrying finding the target node after a delay if needed.
+    }
+    const nodeToObserve = targetNode || document.body;
+
+    console.log(`[Awin Helper] Starting MutationObserver on:`, nodeToObserve);
 
     observer = new MutationObserver((mutationsList, obs) => {
-      clearTimeout(debounceTimeout);
-      debounceTimeout = setTimeout(debouncedHandler, 150); // Debounce
+      // Debounce the handler: Wait for mutations to "settle" before acting.
+      clearTimeout(handleTimeout);
+      handleTimeout = setTimeout(handleStateChange, HANDLE_DELAY_MS);
     });
 
-    observer.observe(targetNode, { childList: true, subtree: true });
+    observer.observe(nodeToObserve, {
+      childList: true, // Detect additions/removals of nodes
+      subtree: true    // Observe descendants as well (crucial for SPAs)
+    });
 
-    // Initial check slightly delayed
-    console.log('[Awin Helper] Performing initial check after observer setup.');
-    setTimeout(handlePossibleNavigation, 200);
+    // Perform an initial check shortly after the observer starts,
+    // ensuring it runs after the debounce delay allows potential initial mutations to settle.
+    console.log('[Awin Helper] Scheduling initial state check.');
+    setTimeout(handleStateChange, HANDLE_DELAY_MS + 200); // Run slightly after observer debounce time
   }
 
-  // Delay observer setup
-  console.log('[Awin Helper] Scheduling observer setup...');
+  // --- Initialization ---
+  // Delay observer setup slightly to allow initial page elements to settle
+  console.log(`[Awin Helper] Scheduling observer setup in ${OBSERVER_START_DELAY_MS}ms...`);
   setTimeout(startObserver, OBSERVER_START_DELAY_MS);
+
+  // Optional: Listen for history changes explicitly (might be redundant with MutationObserver but can sometimes catch SPA navigations faster)
+  // window.addEventListener('popstate', handleStateChange); // Handle browser back/forward
+  // Potentially override pushState/replaceState if needed, but MutationObserver is often sufficient for element changes.
 
 })();
