@@ -20,10 +20,7 @@ background-size: 400% 100%;
 animation: scrollGradient 15s linear infinite;
 color: white;
 border-radius: var(--lwc-borderRadiusMedium, 0.25rem) var(--lwc-borderRadiusMedium, 0.25rem) 0 0;
-
-/* Ensure the background gradient respects the border radius */
 overflow: hidden;
-
 /* Optional: Adjust padding if needed, SLDS default might be fine */
 padding: var(--lwc-spacingSmall, 1rem);
 }
@@ -46,16 +43,17 @@ border: 0 !important;
 }
 
 #awin-helper-panel .awin-helper-mid-display {
-    /* Your styles here */
-    margin-top: 0.1rem; /* Add a small space below the title */
-    line-height: 1.2;   /* Adjust line height if needed */
-    font-style: italic; /* Example: Make it italic */
+    margin-top: 0.1rem;
+    line-height: 1.2;
+    font-style: italic;
     color: white;
-    /* color: #54698d; */ /* Example: Override SLDS weak color if desired */
-    /* font-size: 0.75rem; */ /* Example: Override SLDS small size if desired */
   }
   
-  /* Optional: Hide if it has no text (alternative to inline style) */
-  #awin-helper-panel .awin-helper-mid-display:empty {
-    display: none;
-  }
+/*Hide if it has no text (alternative to inline style) */
+#awin-helper-panel .awin-helper-mid-display:empty {
+display: none;
+}
+
+#awin-helper-panel .slds-icon-standard-custom{
+    background-color: rgba(255, 255, 255, 0.301);
+}
