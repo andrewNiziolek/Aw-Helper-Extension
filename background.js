@@ -1,5 +1,5 @@
 // Variable to control whether the update popup should open
-let disableUpdatePopup = "1"; // Set to "1" to disable, "0" to enable
+let disableUpdatePopup = "0"; // Set to "1" to disable, "0" to enable
 
 // Event listener for when the extension is installed or updated
 chrome.runtime.onInstalled.addListener((details) => {
