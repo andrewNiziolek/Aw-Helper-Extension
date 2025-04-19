@@ -34,8 +34,8 @@
 
   "web_accessible_resources": [
   {
-    "resources": ["scripts/injected.js", "assets/icon48.png"],
-    "matches": ["<all_urls>"]
+    "resources": ["scripts/injected.js", "assets/icon48.png", "assets/sfpanel.css"],
+    "matches": ["*://*.lightning.force.com/*"]
   }
   ],
 
