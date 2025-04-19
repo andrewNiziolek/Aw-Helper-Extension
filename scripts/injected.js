@@ -143,7 +143,7 @@ export function injectCasePanelOnce(mid) {
       ? `<div class="awin-helper-content"><ul>
            ${links.map(link => `<li><a href="${link.href}" target="_blank" rel="noopener noreferrer">${link.label}</a></li>`).join('')}
           </ul></div>`
-      : `<div class="awin-helper-content"><p class="error-message">Awin ID (MID) not found on page.</p></div>`;
+      : `<div class="awin-helper-content"><p class="error-message">The Signed Product may not contain the MID yet.</p></div>`;
 
   // Prepare the MID display HTML block for the header
   const midSubheadingHtml = mid
