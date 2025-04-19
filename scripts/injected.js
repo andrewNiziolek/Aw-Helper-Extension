@@ -134,7 +134,9 @@ export function injectCasePanelOnce(mid) {
   const links = mid
       ? [
           { label: "Tracking Settings", href: `https://ui.awin.com/tracking-settings/us/awin/advertiser/${mid}/main-settings` },
-          { label: "Tracking Diagnosis", href: `https://ui.awin.com/advertiser-integration-tool/trackingwizard/us/awin/merchant/${mid}` }
+          { label: "Commission Groups", href: `https://ui.awin.com/commission-manager/us/awin/merchant/${mid}/commission-groups` },
+          { label: "Tracking Diagnosis", href: `https://ui.awin.com/advertiser-integration-tool/trackingwizard/us/awin/merchant/${mid}` },
+          { label: "Delete Tests", href: `https://ui.awin.com/provider/test-transactions` }
         ]
       : [];
   const listHtml = mid
