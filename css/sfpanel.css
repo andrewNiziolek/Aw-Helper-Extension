@@ -1,0 +1,38 @@
+/* assets/sfpanel.css */
+
+/* Style the wrapper div if you added one, or style elements directly */
+.awin-helper-content {
+    padding: 0.5rem 0; /* Add some vertical padding inside the card body */
+  }
+  
+  ul {
+    list-style-type: disc; /* Or square, or none, etc. */
+    margin: 0;
+    padding-left: 25px; /* Adjust indentation */
+    color: #181818; /* Darker text */
+    font-size: 0.875rem; /* Slightly larger perhaps */
+  }
+  
+  li {
+    margin-bottom: 8px; /* Space between list items */
+  }
+  
+  a {
+    color: #005b96; /* Awin-like blue */
+    text-decoration: none; /* Remove underline by default */
+  }
+  
+  a:hover,
+  a:focus {
+    color: #017fdb;
+    text-decoration: underline;
+  }
+  
+  /* Style for the 'MID not found' message */
+  p.error-message {
+    font-style: italic;
+    color: #c23934; /* Salesforce error color */
+    margin: 0;
+    padding: 5px 0;
+    font-size: 0.875rem;
+  }

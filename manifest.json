@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "2.2",
+  "version": "2.3",
   "author": "Andrew Niziolek",
 
   "name": "Awin Helper",
@@ -30,5 +30,24 @@
   [
     "http://*/",
     "https://*/"
+  ],
+
+  "web_accessible_resources": [
+  {
+    "resources": ["scripts/injected.js", "assets/icon48.png", "css/sfpanel.css", "css/panel-global.css"],
+    "matches": ["*://*.lightning.force.com/*"]
+  }
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.lightning.force.com/*"],
+      "css": [
+        "css/panel-global.css"
+      ],
+      "js": ["scripts/bootstrap.js"],
+      "run_at": "document_idle"
+    }
   ]
+
 }
