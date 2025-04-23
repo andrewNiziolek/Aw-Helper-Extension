@@ -11,7 +11,7 @@ export async function findMidOnPage(maxAttempts = 8, delayMs = 350) {
   const activeCaseViewSelector = 'div.windowViewMode-normal.oneContent.active.lafPageHost';
 
   const programSignedProductDetailsTitle = 'program (signed product) details';
-  const awinIdLabelText = 'awin id';
+  const awinIdLabelText = 'awin ui link';
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       console.log(`[Awin Helper Inject] MID Search Attempt ${attempt}/${maxAttempts}...`);
@@ -40,7 +40,7 @@ export async function findMidOnPage(maxAttempts = 8, delayMs = 350) {
               if (formItem) {
                   //  Step 4: Find the value element 
                   const valueElement = formItem.querySelector(
-                      'lightning-formatted-text, span.test-id__field-value, .slds-form-element__control output, .slds-form-element__control slot[name="outputField"] lightning-formatted-number, .slds-form-element__control lightning-formatted-number, .slds-form-element__control a lightning-formatted-text'
+                      'lightning-formatted-rich-text, span.test-id__field-value, .slds-form-element__control output, .slds-form-element__control slot[name="outputField"] lightning-formatted-number, .slds-form-element__control lightning-formatted-number, .slds-form-element__control a lightning-formatted-text'
                   );
                   if (valueElement) {
                       const potentialMid = valueElement.textContent?.trim();
