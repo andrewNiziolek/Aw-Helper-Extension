@@ -1,5 +1,5 @@
 // Variable to control whether the update popup should open
-let disableUpdatePopup = "1"; // Set to "1" to disable, "0" to enable
+let disableUpdatePopup = "0 "; // Set to "1" to disable, "0" to enable
 
 // Event listener for when the extension is installed or updated
 chrome.runtime.onInstalled.addListener((details) => {
@@ -85,3 +85,84 @@ function transformNumbersToLinks() {
     subtree: true
   });
 }
+
+// Start of New Implementation Tool
+// Create tabs and group them; use the MID passed in from the popup for the group title.
+function createImplTabs(urls, tabMID) {
+  const tabIds = [];
+
+  urls.forEach((url) => {
+    chrome.tabs.create({ url, active: false }, (tab) => {
+      if (!tab || typeof tab.id !== 'number') return;
+      tabIds.push(tab.id);
+
+      // When all tabs are open, group and label them.
+      if (tabIds.length === urls.length) {
+        chrome.tabs.group({ tabIds }, (groupId) => {
+          if (typeof groupId !== 'number') return;
+          chrome.tabGroups.update(groupId, { title: tabMID, color: 'orange' });
+        });
+      }
+    });
+  });
+}
+
+// Listen for sanitized MID from the popup and invoke the tab creation.
+chrome.runtime.onMessage.addListener((request) => {
+  if (request?.action !== 'createNITabs') return;
+
+  const MIDValue = String(request.mid); // already sanitized in popup
+  const URLs = [
+    `https://ui.awin.com/tracking-settings/us/awin/advertiser/${MIDValue}/main-settings`,
+    `https://ui.awin.com/awin/merchant/${MIDValue}/settings/invite-user`,
+    `https://ui.awin.com/commission-manager/us/awin/merchant/${MIDValue}/commission-groups`,
+    `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/plugins`,
+    `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/trackingtagsettings`,
+    `https://ui.awin.com/provider/merchant-settings/${MIDValue}/account-details/network/awin`,
+    `https://ui.awin.com/provider/finance/fee-manager/en/${MIDValue}`,
+    `https://ui.awin.com/provider/merchant-settings/${MIDValue}/mobile-tracking/network/awin`,
+    `https://ui.awin.com/provider/migrated-advertiser-settings/${MIDValue}`,
+    `https://ui.awin.com/provider/pre-join-publishers?advertiserId=${MIDValue}`
+  ];
+
+  createImplTabs(URLs, MIDValue);
+});
+
+// Start Internal Review Tool
+function createIRGroupTabs(urls, mid) {
+  const tabIds = [];
+
+  urls.forEach((url) => {
+    chrome.tabs.create({ url, active: false }, (tab) => {
+      if (!tab || typeof tab.id !== 'number') return;
+      tabIds.push(tab.id);
+
+      if (tabIds.length === urls.length) {
+        chrome.tabs.group({ tabIds }, (groupId) => {
+          if (typeof groupId !== 'number') return;
+          chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: 'orange' });
+        });
+      }
+    });
+  });
+}
+
+chrome.runtime.onMessage.addListener((request) => {
+  if (request?.action !== 'createIRTabs') return;
+
+  const MIDValue = String(request.mid); // already sanitized in popup
+  const URLs = [
+    `https://ui.awin.com/tracking-settings/us/awin/advertiser/${MIDValue}/main-settings`,
+    `https://ui.awin.com/commission-manager/us/awin/merchant/${MIDValue}/commission-groups`,
+    `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/plugins`,
+    `https://ui.awin.com/awin/merchant/${MIDValue}/validate-pending/network/awin`,
+    `https://ui.awin.com/advertiser-integration-tool/trackingwizard/us/awin/merchant/${MIDValue}`,
+    `https://ui.awin.com/provider/merchant-settings/${MIDValue}/account-details/network/awin`,
+    `https://ui.awin.com/provider/merchant-settings/${MIDValue}/mobile-tracking/network/awin`,
+    `https://ui.awin.com/provider/finance/fee-manager/en/${MIDValue}`,
+    `https://ui.awin.com/provider/pre-join-publishers?advertiserId=${MIDValue}`,
+    `https://ui.awin.com/provider/migrated-advertiser-settings/${MIDValue}`
+  ];
+
+  createIRGroupTabs(URLs, MIDValue);
+});
