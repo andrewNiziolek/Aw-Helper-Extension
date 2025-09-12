@@ -66,6 +66,32 @@
     }
   };
 
+  const setDisplay = (id, on) => {
+  const el = document.getElementById(id);
+    if (el) el.style.display = on ? 'grid' : 'none';
+  };
+
+  let _shopifyDomain = '';
+  function renderShopifyRow() {
+    // Always show the Shopify row if Shopify was detected
+    setDisplay('shopifyDisplay', true);
+
+    // myShopify URL only visible in TECH mode
+    const techMode = !!modeCheck?.checked;
+    if (techMode) {
+      setDisplay('myShopifyInfo', true);
+      const t = document.getElementById('myShopifyText');
+      if (t) t.textContent = _shopifyDomain || '';
+      shInitShopifyCopy();
+    } else {
+      setDisplay('myShopifyInfo', false);
+    }
+  }
+  
+  // react to toggle immediately
+  modeCheck?.addEventListener('change', renderShopifyRow);
+  modeCheck?.addEventListener('input', renderShopifyRow);
+
   // render detections
   for (const it of items) {
     if (it.id === "gtm") {
@@ -74,12 +100,9 @@
     if (it.id === "gtss") {
       show("gtSSDisplay", { id: "gtSSText", value: "GTM Server-Side" });
     }
-    if (it.id === "shopify") {
-      show("shopifyDisplay");
-        if (modeCheck?.checked) {
-          show("myShopifyInfo", { id: "myShopifyText", value: it.meta?.shopifyDomain || "" });
-          shInitShopifyCopy();
-        } 
+    if (it.id === 'shopify') {
+      _shopifyDetected = true;
+      _shopifyDomain = it.meta?.shopifyDomain || '';
     }
     if (it.id === "adobe_launch") {
       show("launchDisplay", { id: "launchText", value: "Adobe Launch" });
@@ -101,6 +124,7 @@
       }
     }
   }
+  renderShopifyRow();
 })();
 
 // --- Shopify "click-to-copy" helper ---
