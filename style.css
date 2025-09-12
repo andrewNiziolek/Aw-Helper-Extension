@@ -313,6 +313,67 @@ input:checked + .slider:before {
   z-index: 2;
 }
 
+/* myShopify URL Click to Copy Enhancements */
+#myShopifyInfo {
+  display: none;
+  position: relative;
+}
+
+#myShopifyText {
+  display: block;
+  position: relative;
+  line-height: 40px;
+  padding: 0 26px 0 12px;   /* right padding for icon */
+  margin: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: black;              /* default text color */
+  transition: color 0.3s ease;
+}
+
+/* Clipboard / checkmark icon */
+#copyMyShopifyIcon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+  pointer-events: none;        /* keep pill fully clickable */
+  transition: opacity 0.2s, transform 0.2s, fill 0.3s ease;
+}
+#copyMyShopifyIcon svg {
+  display: block;              /* removes inline gap */
+  fill: #444;                  /* default icon color */
+}
+
+/* hover affordance */
+#myShopifyText:hover #copyMyShopifyIcon {
+  opacity: 1;
+}
+
+/* Flash background when copied */
+#myShopifyInfo.copyFlash {
+  animation: flashBg 900ms ease;
+}
+@keyframes flashBg {
+  0%   { background-color: var(--light-gray); }
+  20%  { background-color: var(--light-orange); }
+  80%  { background-color: var(--light-orange); }
+  100% { background-color: var(--light-gray); }
+}
+
+/* During flash: text + icon color change */
+#myShopifyInfo.copyFlash #myShopifyText {
+  color: white;
+}
+#myShopifyInfo.copyFlash #copyMyShopifyIcon svg {
+  fill: white;
+}
+
 .chip{
   font-size: 12px;
   color: white;
