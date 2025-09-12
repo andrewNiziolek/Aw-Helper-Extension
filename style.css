@@ -361,8 +361,8 @@ input:checked + .slider:before {
 }
 @keyframes flashBg {
   0%   { background-color: var(--light-gray); }
-  20%  { background-color: var(--light-orange); }
-  80%  { background-color: var(--light-orange); }
+  20%  { background-color: var(--orange); }
+  80%  { background-color: var(--orange); }
   100% { background-color: var(--light-gray); }
 }
 
@@ -496,7 +496,7 @@ hr.solid {
   font-weight: bold;
   position: relative;
   top: 0px;
-  color: black;
+  color: currentColor;
   transition: color 0.2s;
 }
 
