@@ -1,5 +1,4 @@
 // scripts/techPanel.js
-
 (async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab) return;
@@ -26,8 +25,8 @@
     if (siteURLText) siteURLText.textContent = url;
   }
 
-  // Ask the service worker for detections; guard against no response / early suspend.
-  const resp = await new Promise((resolve) => {
+  // Ask SW for detections (handles suspended worker); retry once if empty.
+  let { items } = await new Promise((resolve) => {
     chrome.runtime.sendMessage(
       { type: "GET_TECH_DETECTIONS", tabId: tab.id },
       (r) => {
@@ -36,10 +35,20 @@
       }
     );
   });
-  const { items } = resp;
 
+  // If nothing cached (e.g., worker just woke), give CS a beat to re-emit, then retry.
+  if (!items || items.length === 0) {
+    await new Promise((r) => setTimeout(r, 200));
+    const resp2 = await new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        { type: "GET_TECH_DETECTIONS", tabId: tab.id },
+        (r) => resolve(r || { items: [] })
+      );
+    });
+    items = resp2.items || [];
+  }
 
-  // compatibility banner if not in "manual" mode
+  // compatibility banner if not in "technician" mode
   if (!modeCheck?.checked && items.some(i => /^(gtm|gtss|shopify|woocommerce)$/.test(i.id))) {
     const easeMSG = document.getElementById("ratingBox");
     if (compatText) { compatText.textContent = "Site is compatible!"; compatText.style.fontWeight = "bold"; compatText.style.color = "#18a45b"; }
@@ -67,8 +76,10 @@
     }
     if (it.id === "shopify") {
       show("shopifyDisplay");
-      show("myShopifyInfo", { id: "myShopifyText", value: it.meta?.shopifyDomain || "" });
-      shInitShopifyCopy();
+        if (modeCheck?.checked) {
+          show("myShopifyInfo", { id: "myShopifyText", value: it.meta?.shopifyDomain || "" });
+          shInitShopifyCopy();
+        } 
     }
     if (it.id === "adobe_launch") {
       show("launchDisplay", { id: "launchText", value: "Adobe Launch" });

@@ -158,49 +158,74 @@ chrome.runtime.onMessage.addListener((request) => {
   createIRGroupTabs(URLs, MIDValue);
 });
 
-// Tech Detection Script Listener
-const perTab = new Map();
+// Tech Detection Script Listeners and Badge
+const mem = new Map();
+
+async function setDetections(tabId, items) {
+  mem.set(tabId, items);
+  await chrome.storage.session.set({ ['det_'+tabId]: { items, ts: Date.now() } });
+}
+
+async function getDetections(tabId) {
+  if (mem.has(tabId)) return mem.get(tabId);
+  const obj = await chrome.storage.session.get('det_'+tabId);
+  return obj?.['det_'+tabId]?.items || [];
+}
 
 function setBadge(tabId, count) {
-  const text = count > 0 ? String(count) : '';
-  chrome.action.setBadgeText({ tabId, text });
+  chrome.action.setBadgeText({ tabId, text: count ? String(count) : '' });
   chrome.action.setBadgeBackgroundColor({ color: '#FF9550' });
 }
 
-chrome.runtime.onMessage.addListener((msg, sender) => {
-  if (msg?.type !== 'TECH_DETECTIONS') return;
-  const tabId = sender?.tab?.id;
-  if (!Number.isInteger(tabId)) return;
-  perTab.set(tabId, msg.items || []);
-  setBadge(tabId, (msg.items || []).length);
-});
-
-chrome.tabs.onUpdated.addListener((tabId, info) => {
-  if (info.status === 'loading') {
-    perTab.delete(tabId);
-    setBadge(tabId, 0);
-  }
-});
-
-chrome.webNavigation?.onCommitted?.addListener(({ tabId }) => {
-  perTab.delete(tabId);
-  setBadge(tabId, 0);
-});
-
-chrome.webNavigation?.onHistoryStateUpdated?.addListener(({ tabId }) => {
-  perTab.delete(tabId);
-  setBadge(tabId, 0);
-});
-
-chrome.tabs.onRemoved.addListener((tabId) => {
-  perTab.delete(tabId);
-});
-
+// Content script reports
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg?.type === "GET_TECH_DETECTIONS") {
+  if (msg?.type === 'TECH_DETECTIONS') {
+    const tabId = sender?.tab?.id;
+    if (Number.isInteger(tabId)) {
+      setDetections(tabId, msg.items || []).then(() => setBadge(tabId, msg.items?.length || 0));
+    }
+  }
+  if (msg?.type === 'GET_TECH_DETECTIONS') {
     const tabId = msg.tabId;
-    const items = (perTab.get(tabId) || []);
-    sendResponse({ items });
-    return true; // keep channel open for async response
+    (async () => {
+      const items = await getDetections(tabId);
+      if (!items.length) {
+        // ask the content script in that tab to re-run immediately
+        try { chrome.tabs.sendMessage(tabId, { type: 'REDETECT_NOW' }); } catch {}
+      }
+      sendResponse({ items });
+    })();
+    return true; // async
   }
 });
+
+// Keep badge coherent when focus changes
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  const items = await getDetections(tabId);
+  setBadge(tabId, items.length);
+});
+chrome.windows.onFocusChanged.addListener(async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id) {
+    const items = await getDetections(tab.id);
+    setBadge(tab.id, items.length);
+  }
+});
+
+// Clear state when tabs truly go away or reload
+chrome.tabs.onRemoved.addListener((tabId) => {
+  mem.delete(tabId);
+  chrome.storage.session.remove('det_'+tabId);
+});
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.discarded === true) { // tab got discarded
+    // keep storage; badge can reflect last known
+    return;
+  }
+  if (info.status === 'loading') {
+    mem.delete(tabId);
+    setBadge(tabId, 0);
+    // content script will re-emit on DOMContentLoaded; if it doesn’t, popup will ping via GET handler
+  }
+});
+

@@ -100,6 +100,22 @@
     run();
   }
 
+  // Re-run on explicit request from background/popup
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg?.type === 'REDETECT_NOW') {
+      detectAll().catch(() => {});
+    }
+  });
+
+  // Re-emit when the page becomes visible again (tab switched back)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') detectAll().catch(()=>{});
+  });
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) detectAll().catch(()=>{});
+  });
+
+
   // SPA re-run
   (() => {
     let last = location.href;
