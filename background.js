@@ -1,7 +1,6 @@
-// Variable to control whether the update popup should open
-let disableUpdatePopup = "0 "; // Set to "1" to disable, "0" to enable
+// Variable to control whether the update popup should open. "1" to disable.
+let disableUpdatePopup = "0 ";
 
-// Event listener for when the extension is installed or updated
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'update' && disableUpdatePopup === "0") {
     // Open a new tab in a new group when the extension is updated
@@ -16,36 +15,27 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
+// Send the version from manifest.json to the popup script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.getVersion) {
-    // Send the version from manifest.json to the popup script
     const manifestData = chrome.runtime.getManifest();
     sendResponse({ version: manifestData.version });
   }
 });
 
+// Replace MIDs with clickable links on specific SF pages
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
     chrome.scripting.executeScript({
       target: { tabId: tabId },
-      func: transformNumbersToLinks // Inject the function after the page is fully loaded
+      func: transformNumbersToLinks
     });
   }
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      func: transformNumbersToLinks // Inject the function after the page is fully loaded
-    });
-  }
-});
-
+// Function to replace numbers with clickable links
 function transformNumbersToLinks() {
-  // Function to replace numbers with clickable links
   const replaceNumbers = (rootElement = document) => {
-    // Query all 'lightning-formatted-text' elements within the provided root element
     rootElement.querySelectorAll('lightning-formatted-text').forEach(element => {
       // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
       const textContent = element.textContent.trim();
@@ -57,7 +47,6 @@ function transformNumbersToLinks() {
         numberLink.style.textDecoration = 'underline';
         numberLink.target = '_blank'; // Open in a new tab
         
-        // Add tooltip text
         numberLink.title = 'Jump to the UI.'; // Tooltip text
 
         element.replaceWith(numberLink);
@@ -85,6 +74,8 @@ function transformNumbersToLinks() {
     subtree: true
   });
 }
+
+
 
 // Start of New Implementation Tool
 // Create tabs and group them; use the MID passed in from the popup for the group title.

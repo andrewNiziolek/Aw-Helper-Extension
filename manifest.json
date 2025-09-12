@@ -47,6 +47,11 @@
       ],
       "js": ["scripts/bootstrap.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["scripts/techDetect.js"],
+      "run_at": "document_idle"
     }
   ]
 
