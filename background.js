@@ -157,3 +157,50 @@ chrome.runtime.onMessage.addListener((request) => {
 
   createIRGroupTabs(URLs, MIDValue);
 });
+
+// Tech Detection Script Listener
+const perTab = new Map();
+
+function setBadge(tabId, count) {
+  const text = count > 0 ? String(count) : '';
+  chrome.action.setBadgeText({ tabId, text });
+  chrome.action.setBadgeBackgroundColor({ color: '#FF9550' });
+}
+
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg?.type !== 'TECH_DETECTIONS') return;
+  const tabId = sender?.tab?.id;
+  if (!Number.isInteger(tabId)) return;
+  perTab.set(tabId, msg.items || []);
+  setBadge(tabId, (msg.items || []).length);
+});
+
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.status === 'loading') {
+    perTab.delete(tabId);
+    setBadge(tabId, 0);
+  }
+});
+
+chrome.webNavigation?.onCommitted?.addListener(({ tabId }) => {
+  perTab.delete(tabId);
+  setBadge(tabId, 0);
+});
+
+chrome.webNavigation?.onHistoryStateUpdated?.addListener(({ tabId }) => {
+  perTab.delete(tabId);
+  setBadge(tabId, 0);
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  perTab.delete(tabId);
+});
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg?.type === "GET_TECH_DETECTIONS") {
+    const tabId = msg.tabId;
+    const items = (perTab.get(tabId) || []);
+    sendResponse({ items });
+    return true; // keep channel open for async response
+  }
+});
