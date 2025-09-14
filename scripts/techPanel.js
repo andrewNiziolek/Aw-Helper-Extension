@@ -66,25 +66,30 @@
     }
   };
 
+  let _shopifyDetected = false;
+  let _shopifyDomain = '';
+
   const setDisplay = (id, on) => {
-  const el = document.getElementById(id);
+    const el = document.getElementById(id);
     if (el) el.style.display = on ? 'grid' : 'none';
   };
 
-  let _shopifyDomain = '';
   function renderShopifyRow() {
-    // Always show the Shopify row if Shopify was detected
-    setDisplay('shopifyDisplay', true);
+    // hide/show the whole row based on detection
+    setDisplay('shopifyDisplay', _shopifyDetected);
 
-    // myShopify URL only visible in TECH mode
+    if (!_shopifyDetected) {
+      setDisplay('myShopifyInfo', false);
+      return;
+    }
+
     const techMode = !!modeCheck?.checked;
+    setDisplay('myShopifyInfo', techMode);
+
     if (techMode) {
-      setDisplay('myShopifyInfo', true);
       const t = document.getElementById('myShopifyText');
       if (t) t.textContent = _shopifyDomain || '';
       shInitShopifyCopy();
-    } else {
-      setDisplay('myShopifyInfo', false);
     }
   }
   
