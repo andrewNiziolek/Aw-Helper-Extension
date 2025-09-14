@@ -28,3 +28,8 @@ const launchChip = document.getElementById("launchChip");
 launchChip.addEventListener("click", () => {
     chrome.tabs.create({ url:"https://wiki.awin.com/index.php/Adobe_Tag_Manager", active: false });
 });
+
+const tealiumChip = document.getElementById("tealChip");
+tealiumChip.addEventListener("click", () => {
+    chrome.tabs.create({ url:"https://developer.awin.com/docs/client-side-tracking", active: false });
+});

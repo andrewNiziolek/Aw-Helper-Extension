@@ -1,7 +1,6 @@
-// Variable to control whether the update popup should open
-let disableUpdatePopup = "1"; // Set to "1" to disable, "0" to enable
+// Variable to control whether the update popup should open. "1" to disable.
+let disableUpdatePopup = "0 ";
 
-// Event listener for when the extension is installed or updated
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'update' && disableUpdatePopup === "0") {
     // Open a new tab in a new group when the extension is updated
@@ -16,36 +15,27 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
+// Send the version from manifest.json to the popup script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.getVersion) {
-    // Send the version from manifest.json to the popup script
     const manifestData = chrome.runtime.getManifest();
     sendResponse({ version: manifestData.version });
   }
 });
 
+// Replace MIDs with clickable links on specific SF pages
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
     chrome.scripting.executeScript({
       target: { tabId: tabId },
-      func: transformNumbersToLinks // Inject the function after the page is fully loaded
+      func: transformNumbersToLinks
     });
   }
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      func: transformNumbersToLinks // Inject the function after the page is fully loaded
-    });
-  }
-});
-
+// Function to replace numbers with clickable links
 function transformNumbersToLinks() {
-  // Function to replace numbers with clickable links
   const replaceNumbers = (rootElement = document) => {
-    // Query all 'lightning-formatted-text' elements within the provided root element
     rootElement.querySelectorAll('lightning-formatted-text').forEach(element => {
       // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
       const textContent = element.textContent.trim();
@@ -57,7 +47,6 @@ function transformNumbersToLinks() {
         numberLink.style.textDecoration = 'underline';
         numberLink.target = '_blank'; // Open in a new tab
         
-        // Add tooltip text
         numberLink.title = 'Jump to the UI.'; // Tooltip text
 
         element.replaceWith(numberLink);
@@ -85,3 +74,158 @@ function transformNumbersToLinks() {
     subtree: true
   });
 }
+
+
+
+// Start of New Implementation Tool
+// Create tabs and group them; use the MID passed in from the popup for the group title.
+function createImplTabs(urls, tabMID) {
+  const tabIds = [];
+
+  urls.forEach((url) => {
+    chrome.tabs.create({ url, active: false }, (tab) => {
+      if (!tab || typeof tab.id !== 'number') return;
+      tabIds.push(tab.id);
+
+      // When all tabs are open, group and label them.
+      if (tabIds.length === urls.length) {
+        chrome.tabs.group({ tabIds }, (groupId) => {
+          if (typeof groupId !== 'number') return;
+          chrome.tabGroups.update(groupId, { title: tabMID, color: 'orange' });
+        });
+      }
+    });
+  });
+}
+
+// Listen for sanitized MID from the popup and invoke the tab creation.
+chrome.runtime.onMessage.addListener((request) => {
+  if (request?.action !== 'createNITabs') return;
+
+  const MIDValue = String(request.mid); // already sanitized in popup
+  const URLs = [
+    `https://ui.awin.com/tracking-settings/us/awin/advertiser/${MIDValue}/main-settings`,
+    `https://ui.awin.com/awin/merchant/${MIDValue}/settings/invite-user`,
+    `https://ui.awin.com/commission-manager/us/awin/merchant/${MIDValue}/commission-groups`,
+    `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/plugins`,
+    `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/trackingtagsettings`,
+    `https://ui.awin.com/provider/merchant-settings/${MIDValue}/account-details/network/awin`,
+    `https://ui.awin.com/provider/finance/fee-manager/en/${MIDValue}`,
+    `https://ui.awin.com/provider/merchant-settings/${MIDValue}/mobile-tracking/network/awin`,
+    `https://ui.awin.com/provider/migrated-advertiser-settings/${MIDValue}`,
+    `https://ui.awin.com/provider/pre-join-publishers?advertiserId=${MIDValue}`
+  ];
+
+  createImplTabs(URLs, MIDValue);
+});
+
+// Start Internal Review Tool
+function createIRGroupTabs(urls, mid) {
+  const tabIds = [];
+
+  urls.forEach((url) => {
+    chrome.tabs.create({ url, active: false }, (tab) => {
+      if (!tab || typeof tab.id !== 'number') return;
+      tabIds.push(tab.id);
+
+      if (tabIds.length === urls.length) {
+        chrome.tabs.group({ tabIds }, (groupId) => {
+          if (typeof groupId !== 'number') return;
+          chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: 'orange' });
+        });
+      }
+    });
+  });
+}
+
+chrome.runtime.onMessage.addListener((request) => {
+  if (request?.action !== 'createIRTabs') return;
+
+  const MIDValue = String(request.mid); // already sanitized in popup
+  const URLs = [
+    `https://ui.awin.com/tracking-settings/us/awin/advertiser/${MIDValue}/main-settings`,
+    `https://ui.awin.com/commission-manager/us/awin/merchant/${MIDValue}/commission-groups`,
+    `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/plugins`,
+    `https://ui.awin.com/awin/merchant/${MIDValue}/validate-pending/network/awin`,
+    `https://ui.awin.com/advertiser-integration-tool/trackingwizard/us/awin/merchant/${MIDValue}`,
+    `https://ui.awin.com/provider/merchant-settings/${MIDValue}/account-details/network/awin`,
+    `https://ui.awin.com/provider/merchant-settings/${MIDValue}/mobile-tracking/network/awin`,
+    `https://ui.awin.com/provider/finance/fee-manager/en/${MIDValue}`,
+    `https://ui.awin.com/provider/pre-join-publishers?advertiserId=${MIDValue}`,
+    `https://ui.awin.com/provider/migrated-advertiser-settings/${MIDValue}`
+  ];
+
+  createIRGroupTabs(URLs, MIDValue);
+});
+
+// Tech Detection Script Listeners and Badge
+const mem = new Map();
+
+async function setDetections(tabId, items) {
+  mem.set(tabId, items);
+  await chrome.storage.session.set({ ['det_'+tabId]: { items, ts: Date.now() } });
+}
+
+async function getDetections(tabId) {
+  if (mem.has(tabId)) return mem.get(tabId);
+  const obj = await chrome.storage.session.get('det_'+tabId);
+  return obj?.['det_'+tabId]?.items || [];
+}
+
+function setBadge(tabId, count) {
+  chrome.action.setBadgeText({ tabId, text: count ? String(count) : '' });
+  chrome.action.setBadgeBackgroundColor({ color: '#FF9550' });
+}
+
+// Content script reports
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg?.type === 'TECH_DETECTIONS') {
+    const tabId = sender?.tab?.id;
+    if (Number.isInteger(tabId)) {
+      setDetections(tabId, msg.items || []).then(() => setBadge(tabId, msg.items?.length || 0));
+    }
+  }
+  if (msg?.type === 'GET_TECH_DETECTIONS') {
+    const tabId = msg.tabId;
+    (async () => {
+      const items = await getDetections(tabId);
+      if (!items.length) {
+        // ask the content script in that tab to re-run immediately
+        try { chrome.tabs.sendMessage(tabId, { type: 'REDETECT_NOW' }); } catch {}
+      }
+      sendResponse({ items });
+    })();
+    return true; // async
+  }
+});
+
+// Keep badge coherent when focus changes
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  const items = await getDetections(tabId);
+  setBadge(tabId, items.length);
+});
+chrome.windows.onFocusChanged.addListener(async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id) {
+    const items = await getDetections(tab.id);
+    setBadge(tab.id, items.length);
+  }
+});
+
+// Clear state when tabs truly go away or reload
+chrome.tabs.onRemoved.addListener((tabId) => {
+  mem.delete(tabId);
+  chrome.storage.session.remove('det_'+tabId);
+});
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.discarded === true) { // tab got discarded
+    // keep storage; badge can reflect last known
+    return;
+  }
+  if (info.status === 'loading') {
+    mem.delete(tabId);
+    setBadge(tabId, 0);
+    // content script will re-emit on DOMContentLoaded; if it doesn’t, popup will ping via GET handler
+  }
+});
+
