@@ -115,6 +115,17 @@
     if (it.id === "woocommerce") {
       show("wooCommDisplay", { id: "wooCommStatus", value: "WooCommerce" });
     }
+    if (it.id === "tealium") {
+      show("tealiumDisplay", { id: "tealiumText", value: it.label });
+    }
+    if (it.id === 'cmp') {
+      show('consentDisplay', { id: 'consentText', value: 'Cookie Consent' }); // title stays
+      const chip = document.getElementById('consentChip');
+      if (chip && it.meta?.tooltip) {
+        chip.setAttribute('data-tooltip', it.meta.tooltip);
+        chip.classList.add('tooltip');
+      }
+    }
     if (it.id === "dwin1") {
       const chip = document.getElementById("awcChip");
       const panel = document.getElementById("awcDisplay");
