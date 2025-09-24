@@ -1,5 +1,5 @@
 // Variable to control whether the update popup should open. "1" to disable.
-let disableUpdatePopup = "0 ";
+let disableUpdatePopup = "0";
 
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'update' && disableUpdatePopup === "0") {
@@ -148,6 +148,7 @@ chrome.runtime.onMessage.addListener((request) => {
     `https://ui.awin.com/advertiser-mastertag/us/awin/${MIDValue}/plugins`,
     `https://ui.awin.com/awin/merchant/${MIDValue}/validate-pending/network/awin`,
     `https://ui.awin.com/advertiser-integration-tool/trackingwizard/us/awin/merchant/${MIDValue}`,
+    `https://ui.awin.com/provider/test-transactions`,
     `https://ui.awin.com/provider/merchant-settings/${MIDValue}/account-details/network/awin`,
     `https://ui.awin.com/provider/merchant-settings/${MIDValue}/mobile-tracking/network/awin`,
     `https://ui.awin.com/provider/finance/fee-manager/en/${MIDValue}`,
