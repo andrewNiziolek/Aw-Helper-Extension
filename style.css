@@ -275,6 +275,7 @@ input:checked + .slider:before {
 .announceDisplay{
   display: none;
   grid-template-columns: .25fr 1fr .35fr;
+  align-items: center;
   border-radius: 5px;
   margin-bottom: 10px;
   height: 80px;
@@ -294,9 +295,8 @@ input:checked + .slider:before {
 
 .announceReadout{
   text-align: left;
-  margin-top: 35px;
   margin-left: 15px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: light;
 }
 
@@ -423,10 +423,14 @@ input:checked + .slider:before {
   width: min-content;
   margin-top: 27px;
   margin-right: 15px;
+  padding: 6px 8px;
   cursor: pointer;
-  padding: 7px;
   border: 2px solid transparent;
   transition: border-color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .chip:hover {
@@ -471,6 +475,18 @@ input:checked + .slider:before {
 
 .chipDifficult{
   background-color: #DE0732;
+}
+
+.chip .chipIcon{
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.chip .chipIcon use,
+.chip .chipIcon path,
+.chip .chipIcon svg{
+  fill: currentColor;
 }
 
 .ratingDiv{
@@ -677,6 +693,80 @@ input[type="text"]#opBox {
   visibility: visible;
 }
 
+/* --- Announce panel --- */
+.announceDisplay.is-visible { display: grid; }
+
+.announceDisplay.is-info    { background-color: #ffffff; border: 1px solid #e6f0ff; }
+.announceDisplay.is-warning { background-color: #ffffff; border: 1px solid #fff2d6; }
+.announceDisplay.is-critical{ background-color: #ffffff; border: 1px solid #ffd6dc; }
+
+/* Optional: lightly tint the left icon strip per type */
+.announceDisplay.is-info .announceIcon     { color: #2f6fed; }
+.announceDisplay.is-warning .announceIcon  { color: #b36b00; }
+.announceDisplay.is-critical .announceIcon { color: #b1001d; }
+
+.announceIcon svg { display: block; }
+
+/* Use your chip base; add type variants for announce */
+.chipInfo     { background-color: #dfeaff; color: #083b9a; }
+.chipWarning  { background-color: #ffe7bf; color: #7a4b00; }
+.chipCritical { background-color: #ffc9cf; color: #7a0013; }
+
+/* Right-side chip in the main bar (reusing .chip) */
+.announceChip { 
+  margin-left: auto; 
+  margin-right: 15px; 
+}
+
+.announceAdditionalInfo.is-open { display: block; height: auto; min-height: 40px; }
+
+.announceMore__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.announceMore__body { text-align: left; }
+
+/* Actions on the right */
+.announceMore__actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+/* Button/link styles (kept subtle, aligned to your orange theme) */
+.annLink {
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 25px;
+  border: 1.5px solid var(--high-orange);
+  color: var(--high-orange);
+  background: white;
+  transition: 0.2s;
+}
+.annLink:hover { color: white; background: var(--orange); border-color: var(--orange); }
+
+.annDismiss {
+  all: unset;
+  padding: 6px 10px;
+  border-radius: 25px;
+  border: 1.5px solid #bbb;
+  color: #333;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.annDismiss:hover { border-color: var(--dark-orange); color: var(--dark-orange); }
+
+/* Keyboard focus for the main bar (accessible, no inline styles) */
+#announceMount[tabindex="0"]:focus {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
 /*Awin Logo*/
 .st0{fill:#FF6600;}
 .st1{fill:#E74030;}
@@ -691,5 +781,6 @@ input[type="text"]#opBox {
   --high-orange: #FF6600;
   --dark-orange: #fc8e45;
   --light-gray: #e0e0e0;
+  --medium-gray: #5e5e5e;
   --dark-gray: #242424;
 }
