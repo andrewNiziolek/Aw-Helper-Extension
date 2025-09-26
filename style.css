@@ -399,11 +399,6 @@ input:checked + .slider:before {
 }
 .annDismiss:hover { border-color: var(--dark-orange); color: var(--dark-orange); }
 
-#announceMount[tabindex="0"]:focus {
-  outline: 2px solid var(--orange);
-  outline-offset: 2px;
-}
-
 .techDisplay{
   display: none;
   grid-template-columns: .25fr 1fr .35fr;
