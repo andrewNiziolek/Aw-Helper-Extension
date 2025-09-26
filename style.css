@@ -274,7 +274,7 @@ input:checked + .slider:before {
 
 .announceDisplay{
   display: none;
-  grid-template-columns: .25fr 1fr .35fr;
+  grid-template-columns: 40px 1fr auto;
   align-items: center;
   border-radius: 5px;
   margin-bottom: 10px;
@@ -289,15 +289,32 @@ input:checked + .slider:before {
 }
 
 .announceIcon{
-  margin-top: 5px;
+  margin-top: 0px;
   margin-left: 5px;
+  align-items: center;
 }
 
-.announceReadout{
+.announceData {
+  display: flex;
+  align-items: center;   /* vertical center */
+  margin-left: 15px;     /* spacing from icon */
+}
+
+#announceText {
+  margin: 0;             /* reset margins */
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.announceReadout {
   text-align: left;
   margin-left: 15px;
-  font-size: 12px;
-  font-weight: light;
+  margin-top: 0;       /* reset */
+  margin-bottom: 0;    /* reset */
+  font-size: 12px;     /* bump size if needed */
+  font-weight: 300;
+  display: flex;
+  align-items: center; /* vertically center text in its grid cell */
 }
 
 .announceAdditionalInfo{
@@ -313,6 +330,80 @@ input:checked + .slider:before {
   z-index: 2;
 }
 
+.announceDisplay.is-visible { display: grid; }
+
+.announceDisplay.is-info    { background-color: #ffffff; border: 1px solid #e6f0ff; }
+.announceDisplay.is-warning { background-color: #ffffff; border: 1px solid #fff2d6; }
+.announceDisplay.is-critical{ background-color: #ffffff; border: 1px solid #ffd6dc; }
+
+.announceDisplay.is-info .announceIcon     { color: #2f6fed; }
+.announceDisplay.is-warning .announceIcon  { color: #b36b00; }
+.announceDisplay.is-critical .announceIcon { color: #b1001d; }
+
+.announceIcon svg { display: block; }
+
+/* Use chip base; add type variants for announce */
+.chipInfo     { background-color: #dfeaff; color: #083b9a; }
+.chipWarning  { background-color: #ffe7bf; color: #7a4b00; }
+.chipCritical { background-color: #ffc9cf; color: #7a0013; }
+
+/* Right-side chip in the main bar (reusing .chip) */
+.announceChip {  
+  margin-right: 15px;
+  margin-bottom: 25px; 
+}
+
+.announceAdditionalInfo.is-open { display: block; height: auto; min-height: 40px; }
+
+.announceMore__inner {
+  display: flex;
+  align-items: flex-start;    /* top align actions vs. body */
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.announceMore__body {
+  flex: 1 1 auto;             /* let body expand */
+  text-align: left;
+  margin-right: 10px;         /* space before actions */
+}
+
+.announceMore__actions {
+  display: flex;
+  flex-direction: column;     /* stack buttons vertically */
+  gap: 8px;                   /* space between them */
+  flex: 0 0 auto;             /* don’t stretch */
+}
+
+.annLink {
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 25px;
+  border: 1.5px solid var(--high-orange);
+  color: var(--high-orange);
+  background: white;
+  transition: 0.2s;
+}
+.annLink:hover { color: white; background: var(--orange); border-color: var(--orange); }
+
+.annDismiss {
+  all: unset;
+  padding: 6px 10px;
+  border-radius: 25px;
+  border: 1.5px solid #bbb;
+  color: #242424;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.annDismiss:hover { border-color: var(--dark-orange); color: var(--dark-orange); }
+
+#announceMount[tabindex="0"]:focus {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
 .techDisplay{
   display: none;
   grid-template-columns: .25fr 1fr .35fr;
@@ -325,7 +416,7 @@ input:checked + .slider:before {
   justify-content: center;
   vertical-align: middle;
   z-index: 2;
-  box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2); /* Horizontal offset, Vertical offset, Blur radius, Color */
+  box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
 }
 
 .techIcon{
@@ -364,13 +455,13 @@ input:checked + .slider:before {
   display: block;
   position: relative;
   line-height: 40px;
-  padding: 0 26px 0 12px;   /* right padding for icon */
+  padding: 0 26px 0 12px;
   margin: 0;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: black;              /* default text color */
+  color: black; 
   transition: color 0.3s ease;
 }
 
@@ -383,15 +474,14 @@ input:checked + .slider:before {
   width: 14px;
   height: 14px;
   opacity: 0.6;
-  pointer-events: none;        /* keep pill fully clickable */
+  pointer-events: none;
   transition: opacity 0.2s, transform 0.2s, fill 0.3s ease;
 }
 #copyMyShopifyIcon svg {
-  display: block;              /* removes inline gap */
-  fill: #444;                  /* default icon color */
+  display: block;
+  fill: #444;
 }
 
-/* hover affordance */
 #myShopifyText:hover #copyMyShopifyIcon {
   opacity: 1;
 }
@@ -691,80 +781,6 @@ input[type="text"]#opBox {
 .tooltip:hover::after {
   opacity: 1;
   visibility: visible;
-}
-
-/* --- Announce panel --- */
-.announceDisplay.is-visible { display: grid; }
-
-.announceDisplay.is-info    { background-color: #ffffff; border: 1px solid #e6f0ff; }
-.announceDisplay.is-warning { background-color: #ffffff; border: 1px solid #fff2d6; }
-.announceDisplay.is-critical{ background-color: #ffffff; border: 1px solid #ffd6dc; }
-
-/* Optional: lightly tint the left icon strip per type */
-.announceDisplay.is-info .announceIcon     { color: #2f6fed; }
-.announceDisplay.is-warning .announceIcon  { color: #b36b00; }
-.announceDisplay.is-critical .announceIcon { color: #b1001d; }
-
-.announceIcon svg { display: block; }
-
-/* Use your chip base; add type variants for announce */
-.chipInfo     { background-color: #dfeaff; color: #083b9a; }
-.chipWarning  { background-color: #ffe7bf; color: #7a4b00; }
-.chipCritical { background-color: #ffc9cf; color: #7a0013; }
-
-/* Right-side chip in the main bar (reusing .chip) */
-.announceChip { 
-  margin-left: auto; 
-  margin-right: 15px; 
-}
-
-.announceAdditionalInfo.is-open { display: block; height: auto; min-height: 40px; }
-
-.announceMore__inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 10px;
-  font-size: 13px;
-}
-
-.announceMore__body { text-align: left; }
-
-/* Actions on the right */
-.announceMore__actions {
-  display: flex;
-  gap: 8px;
-  flex: 0 0 auto;
-}
-
-/* Button/link styles (kept subtle, aligned to your orange theme) */
-.annLink {
-  text-decoration: none;
-  padding: 6px 10px;
-  border-radius: 25px;
-  border: 1.5px solid var(--high-orange);
-  color: var(--high-orange);
-  background: white;
-  transition: 0.2s;
-}
-.annLink:hover { color: white; background: var(--orange); border-color: var(--orange); }
-
-.annDismiss {
-  all: unset;
-  padding: 6px 10px;
-  border-radius: 25px;
-  border: 1.5px solid #bbb;
-  color: #333;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.annDismiss:hover { border-color: var(--dark-orange); color: var(--dark-orange); }
-
-/* Keyboard focus for the main bar (accessible, no inline styles) */
-#announceMount[tabindex="0"]:focus {
-  outline: 2px solid var(--orange);
-  outline-offset: 2px;
 }
 
 /*Awin Logo*/
