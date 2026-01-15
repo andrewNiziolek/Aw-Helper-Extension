@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "2.4.0.1",
+  "version": "3.0",
   "author": "Andrew Niziolek",
 
   "name": "Awin Helper",
@@ -23,7 +23,8 @@
   "tabs",
   "activeTab",
   "scripting",
-  "tabGroups"
+  "tabGroups",
+  "sidePanel"
   ],
 
   "host_permissions":
