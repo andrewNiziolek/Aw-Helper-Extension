@@ -1,4 +1,4 @@
-/* Colors , Scroll Components, Fonts, Tooltip, Rest Icon, Input Fields, */
+/* Global CSS Components*/
 
 :root{
     --orange-pale: #FF9550;
@@ -9,16 +9,36 @@
     --gray-medium: #777573;
     --gray-strong: #3e3c3b;
     --black-ref: #101010;
+
+    --shadow-gray: 0px 5px 5px rgba(0, 0, 0, 0.2);
+
+    --bg-main: var(--gray-light);
+    --font-col: var(--black-ref);
+    --font-alt-col: var(--gray-light);
+    --accent: var(--orange);
+
+    --btn-bg: var(--orange-pale);
+    --btn-acc: var(--gray-light);
+    --btn-white: var(--gray-light);
+
+    --tool-bg: var(--gray-strong);
+    --panel-border: white;
+    --shadows: var(--shadow-gray)
+}
+
+html{
+    width: 600px;
+    max-height: 600px;
+    min-height: 275px;
 }
 
 body{
-    /*Default Light Mode Colors*/
-    --bg-main: var(--gray-light);
-    --font-col: var(--black-ref);
-    --accent: var(--orange);
-    --btn-bg: var(--orange-strong);
-    --tool-bg: var(--gray-strong);
-    --panel-border: var(--gray-medium);
+    background: var(--bg-main);
+    width: 100%;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: grayscale
 }
 
 .theme-dark{
@@ -26,31 +46,53 @@ body{
     --font-col: var(--gray-light);
     --accent: var(--orange-strong);
     --btn-bg: var(--orange-dark);
+    --btn-acc: var(--orange-strong);
+    --shadows: var()
+}
+
+/* Scroll Bar */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #242424;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--orange);;
 }
 
 .tooltip {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
 }
 
 .tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--tool-bg);
-  color: var(--font-col);
-  padding: 5px;
-  border-radius: 3px;
-  white-space: normal;
-  max-width: 240px;
-  text-align: center;
-  z-index: 1;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s;
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--tool-bg);
+    color: var(--font-col);
+    padding: 5px;
+    border-radius: 3px;
+    white-space: normal;
+    max-width: 240px;
+    text-align: center;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
 
 .chipEasy{
@@ -84,6 +126,43 @@ body{
 .chip .chipIcon path,
 .chip .chipIcon svg{
   fill: currentColor;
+}
+
+.chip{
+  font-size: 12px;
+  color: white;
+  border-radius: 15px;
+  height: min-content;
+  width: min-content;
+  margin-top: 27px;
+  margin-right: 15px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.chip:hover {
+  border-color: #ff6600b0;
+}
+
+.chipAwin {
+  white-space: nowrap;
+  background: linear-gradient(
+    270deg,
+    #de0732 0%,
+    #FF6600 20%,
+    #fab418 50%,
+    #DE0732 100%
+
+  );
+  background-size: 400% 100%;
+  animation: scrollGradient 15s linear infinite;
+  color: white;
 }
 
 /*Ref Aw Colors*/

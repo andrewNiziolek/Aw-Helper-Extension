@@ -18,12 +18,15 @@
 
   "action": {"default_popup": "popup.html"},
 
+  "side_panel": {"default_path": "sidepanel.html"},
+
   "permissions": 
   ["storage", 
   "tabs",
   "activeTab",
   "scripting",
-  "tabGroups"
+  "tabGroups",
+  "sidePanel"
   ],
 
   "host_permissions":

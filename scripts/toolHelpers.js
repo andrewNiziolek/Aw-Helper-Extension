@@ -1,5 +1,19 @@
 // === Generic Controllers & Helpers ===
 
+//Open Side Panel
+const spButton = document.getElementById("spButton");
+
+spButton?.addEventListener("click", async () => {
+  // 1. Get the current window
+  const currentWindow = await chrome.windows.getCurrent();
+  
+  // 2. Pass the windowId to the open command
+  await chrome.sidePanel.open({ windowId: currentWindow.id });
+  
+  // Optional: Close the popup so the user can focus on the side panel
+  window.close(); 
+});
+
 // Collapsible Sections
 var coll = document.getElementsByClassName("collapsible");
 var i;
