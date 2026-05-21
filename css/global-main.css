@@ -1,0 +1,33 @@
+/* Colors , Scroll Components, Fonts, Tooltip, Rest Icon, Input Fields, */
+
+:root{
+    --orange-pale: #FF9550;
+    --orange: #FF7D28;
+    --orange-strong: #FF6600;
+    --orange-dark: #af4600;
+    --gray-light: #f8f4f0;
+    --gray-medium: #777573;
+    --gray-strong: #3e3c3b;
+    --black-ref: #101010;
+
+    /*Default Light Mode Colors*/
+    --bg-main: var(--gray-light);
+    --font-col: var(--black-ref);
+    --accent: var(--orange);
+    --btn-bg: var(--orange-strong);
+}
+
+.theme-dark{
+    --bg-main: var(--gray-strong);
+    --font-col: var(--gray-light);
+    --accent: var(--orange-strong);
+    --btn-bg: var(--orange-dark);
+}
+
+/*Ref Aw Colors*/
+.st0{fill:#FF6600;}
+.st1{fill:#E74030;}
+.st2{fill:#FAB418;}
+.st3{fill:#DE0732;}
+.st4{fill:#DE0733;}
+.st5{fill:#CC1D46;}

@@ -1,9 +1,7 @@
-// Variable to control whether the update popup should open. "1" to disable.
-let disableUpdatePopup = "0";
-
+// New update page popup.
+let disableUpdatePopup = "1";
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'update' && disableUpdatePopup === "0") {
-    // Open a new tab in a new group when the extension is updated
     chrome.tabs.create({ url: 'https://aniziolek.notion.site/Awin-Helper-Updates-1ec7c46530f34c3691e307f498284fd4?pvs=74', active: true }, (tab) => {
       chrome.tabs.group({ tabIds: [tab.id] }, (groupId) => {
         chrome.tabGroups.update(groupId, {
@@ -15,7 +13,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
-// Send the version from manifest.json to the popup script
+// Link Version Display in popup to manifest version number.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.getVersion) {
     const manifestData = chrome.runtime.getManifest();
@@ -23,7 +21,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Replace MIDs with clickable links on specific SF pages
+// --- Replace MIDs with clickable UI links ---
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
     chrome.scripting.executeScript({
@@ -33,7 +31,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
-// Function to replace numbers with clickable links
 function transformNumbersToLinks() {
   const replaceNumbers = (rootElement = document) => {
     rootElement.querySelectorAll('lightning-formatted-text').forEach(element => {
@@ -75,14 +72,11 @@ function transformNumbersToLinks() {
   });
 }
 
-
-
-// Start of New Implementation Tool
-// Create tabs and group them; use the MID passed in from the popup for the group title.
-function createImplTabs(urls, tabMID) {
+// Grouped Tab Creator
+function createTabGroup(urls, mid, toolName) {
   const tabIds = [];
 
-  urls.forEach((url) => {
+    urls.forEach((url) => {
     chrome.tabs.create({ url, active: false }, (tab) => {
       if (!tab || typeof tab.id !== 'number') return;
       tabIds.push(tab.id);
@@ -91,6 +85,9 @@ function createImplTabs(urls, tabMID) {
       if (tabIds.length === urls.length) {
         chrome.tabs.group({ tabIds }, (groupId) => {
           if (typeof groupId !== 'number') return;
+          if (toolName == "irTool") {
+            chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: 'orange' });
+          }
           chrome.tabGroups.update(groupId, { title: tabMID, color: 'orange' });
         });
       }
@@ -98,11 +95,11 @@ function createImplTabs(urls, tabMID) {
   });
 }
 
-// Listen for sanitized MID from the popup and invoke the tab creation.
+// New Implementation Tool
 chrome.runtime.onMessage.addListener((request) => {
   if (request?.action !== 'createNITabs') return;
 
-  const MIDValue = String(request.mid); // already sanitized in popup
+  const MIDValue = String(request.mid);
   const URLs = [
     `https://ui.awin.com/tracking-settings/us/awin/advertiser/${MIDValue}/main-settings`,
     `https://ui.awin.com/awin/merchant/${MIDValue}/settings/invite-user`,
@@ -116,28 +113,10 @@ chrome.runtime.onMessage.addListener((request) => {
     `https://ui.awin.com/provider/pre-join-publishers?advertiserId=${MIDValue}`
   ];
 
-  createImplTabs(URLs, MIDValue);
+  createTabGroups(URLs, MIDValue, "implTool");
 });
 
-// Start Internal Review Tool
-function createIRGroupTabs(urls, mid) {
-  const tabIds = [];
-
-  urls.forEach((url) => {
-    chrome.tabs.create({ url, active: false }, (tab) => {
-      if (!tab || typeof tab.id !== 'number') return;
-      tabIds.push(tab.id);
-
-      if (tabIds.length === urls.length) {
-        chrome.tabs.group({ tabIds }, (groupId) => {
-          if (typeof groupId !== 'number') return;
-          chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: 'orange' });
-        });
-      }
-    });
-  });
-}
-
+// Internal Review Tool
 chrome.runtime.onMessage.addListener((request) => {
   if (request?.action !== 'createIRTabs') return;
 
@@ -156,7 +135,7 @@ chrome.runtime.onMessage.addListener((request) => {
     `https://ui.awin.com/provider/migrated-advertiser-settings/${MIDValue}`
   ];
 
-  createIRGroupTabs(URLs, MIDValue);
+  createTabGropus(URLs, MIDValue, "irTool");
 });
 
 // Tech Detection Script Listeners and Badge
