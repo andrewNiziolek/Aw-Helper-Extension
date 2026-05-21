@@ -1,4 +1,6 @@
 (() => {
+  console.log("🛠️ [Awin Helper] Tech Detection Script Injected");
+
   // ==========================================
   // 1. REGISTRIES & CONFIG
   // ==========================================
@@ -15,10 +17,14 @@
           return url.searchParams?.has('gcs') && (/(^|\/)gtm\.js$/.test(url.pathname) || /(^|\/)(collect|g\/collect)$/.test(url.pathname));
         } catch { return false; }
       },
-      globalsMatchFn: () => typeof self.gtag === 'function' && (self.gtag.toString().includes("consent") || !!self.google_tag_data?.consent)
+      globalsMatchFn: () => {
+        try { return typeof self.gtag === 'function' && (self.gtag.toString().includes("consent") || !!self.google_tag_data?.consent); } catch { return false; }
+      }
     },
     { id: 'shopify_native', name: 'Shopify Native', priority: 100, 
-      globalsMatchFn: () => typeof self.Shopify?.customerPrivacy === 'object' && (typeof self.Shopify.customerPrivacy.setTrackingConsent === 'function')
+      globalsMatchFn: () => {
+        try { return typeof self.Shopify?.customerPrivacy === 'object' && typeof self.Shopify.customerPrivacy.setTrackingConsent === 'function'; } catch { return false; }
+      }
     }
   ];
 
@@ -29,9 +35,10 @@
     try { return src ? new URL(src, location.href) : null; } catch { return null; }
   };
 
-  const hasAnyGlobal = (names) => names?.some(n => typeof self[n] !== 'undefined');
+  const hasAnyGlobal = (names) => {
+    try { return names?.some(n => typeof self[n] !== 'undefined'); } catch { return false; }
+  };
 
-  // Extracts inline shopify domain from script text
   const waitForShopify = async (timeout = 50) => {
     return new Promise((resolve) => {
       const start = Date.now();
@@ -42,7 +49,7 @@
           const m = (s.textContent || "").match(rgx);
           if (m) return resolve(m[1]);
         }
-        Date.now() - start < timeout ? requestAnimationFrame(tick) : resolve("");
+        Date.now() - start < timeout ? setTimeout(tick, 10) : resolve("");
       };
       tick();
     });
@@ -53,26 +60,23 @@
   // ==========================================
   function scanPageEnvironment() {
     const data = {
-      scriptUrls: [],
-      gtmId: "",
-      sgtmHost: false,
-      dwinUrls: [],
-      tealium: typeof window.utag === "object" ? "Tealium IQ" : "",
-      shopifySrc: /(?:^|\.)myshopify\.com$/i.test(location.hostname),
-      woo: false,
-      adobe: false
+      scriptUrls: [], gtmId: "", sgtmHost: false, dwinUrls: [],
+      tealium: "", shopifySrc: /(?:^|\.)myshopify\.com$/i.test(location.hostname),
+      woo: false, adobe: false
     };
+
+    try {
+      if (typeof window.utag === "object") data.tealium = "Tealium IQ";
+    } catch (e) {}
 
     const dwinRegex = /([^/]+)\.js(?:\?.*)?$/;
 
-    // Loop the DOM exactly ONCE
     for (const s of document.scripts) {
       const src = s.src;
       if (!src) continue;
 
       data.scriptUrls.push(src);
 
-      // Fast substring checks
       if (!data.shopifySrc && src.includes("myshopify.com")) data.shopifySrc = true;
       if (!data.woo && src.includes("woocommerce")) data.woo = true;
       if (!data.adobe && src.includes("adobedtm")) data.adobe = true;
@@ -83,25 +87,21 @@
         if (m && m[1]) data.dwinUrls.push(m[1]);
       }
 
-      // URL Object checks (Parse once per script)
       const u = safeURL(src);
       if (!u) continue;
 
       const id = u.searchParams.get("id");
 
-      // Standard GTM
-      if (!data.gtmId && u.pathname.includes("gtm.js")) {
+      if (!data.gtmId && (u.pathname.includes("gtm.js") || u.pathname.includes("gtag/js"))) {
         data.gtmId = id || "GTM Found";
       }
 
-      // Server-Side GTM
       if (!data.sgtmHost && (id?.startsWith("GTM-") || id?.startsWith("G-") || u.pathname.includes("gtm.js") || u.pathname.includes("gtag/js"))) {
         const isStandardGoogle = u.hostname.includes("googletagmanager.com") || u.hostname.includes("google-analytics.com");
         if (!isStandardGoogle) data.sgtmHost = u.hostname;
       }
     }
 
-    // Catch dynamic loads for CMP via Performance API
     try {
       for (const e of performance.getEntriesByType('resource')) {
         if (typeof e?.name === 'string') data.scriptUrls.push(e.name);
@@ -119,13 +119,8 @@
 
     CMP_REGISTRY.forEach(provider => {
       let hit = false;
-
-      if (provider.scripts) {
-        hit = scriptUrls.some(u => provider.scripts.some(rx => rx.test(u)));
-      }
-      if (!hit && provider.scriptsMatchFn) {
-        hit = scriptUrls.some(u => provider.scriptsMatchFn(u));
-      }
+      if (provider.scripts) hit = scriptUrls.some(u => provider.scripts.some(rx => rx.test(u)));
+      if (!hit && provider.scriptsMatchFn) hit = scriptUrls.some(u => provider.scriptsMatchFn(u));
       if (!hit && provider.globals && hasAnyGlobal(provider.globals)) hit = true;
       if (!hit && provider.globalsMatchFn && provider.globalsMatchFn()) hit = true;
 
@@ -135,49 +130,51 @@
     if (!found.length) return null;
 
     found.sort((a, b) => a.priority - b.priority);
-    const uniq = Array.from(new Map(found.map(f => [f.id, f])).values()); // Fast dedupe
+    const uniq = Array.from(new Map(found.map(f => [f.id, f])).values());
 
-    return {
-      providers: uniq.map(x => x.name),
-      tooltip: uniq.map(x => x.name).join(', ')
-    };
+    return { providers: uniq.map(x => x.name), tooltip: uniq.map(x => x.name).join(', ') };
   }
 
   // ==========================================
   // 5. MAIN EXECUTION
   // ==========================================
   async function detectAll() {
+    console.group("[Awin Helper] Detection Run");
     const env = scanPageEnvironment();
+    console.log("Raw Scanned Data:", env);
+    
     const items = [];
-
     if (env.gtmId) items.push({ id: "gtm", label: env.gtmId });
     if (env.sgtmHost) items.push({ id: "gtss", label: "GTM Server-Side" });
 
     const shopDomain = await waitForShopify();
-    if (env.shopifySrc || shopDomain) {
-      items.push({ id: "shopify", label: "Shopify", meta: { shopifyDomain: shopDomain || "" } });
-    }
+    if (env.shopifySrc || shopDomain) items.push({ id: "shopify", label: "Shopify", meta: { shopifyDomain: shopDomain || "" } });
 
     if (env.woo) items.push({ id: "woocommerce", label: "WooCommerce" });
     if (env.adobe) items.push({ id: "adobe_launch", label: "Adobe Launch" });
     if (env.tealium) items.push({ id: "tealium", label: env.tealium });
-
-    if (env.dwinUrls.length) {
-      items.push({ id: "dwin1", label: env.dwinUrls[0], meta: { all: env.dwinUrls } });
-    }
+    if (env.dwinUrls.length) items.push({ id: "dwin1", label: env.dwinUrls[0], meta: { all: env.dwinUrls } });
 
     const cmp = detectCMPProviders(env.scriptUrls);
-    if (cmp) {
-      items.push({ id: 'cmp', label: 'Cookie Consent', meta: { providers: cmp.providers, tooltip: cmp.tooltip } });
-    }
+    if (cmp) items.push({ id: 'cmp', label: 'Cookie Consent', meta: { providers: cmp.providers, tooltip: cmp.tooltip } });
 
-    chrome.runtime.sendMessage({ type: "TECH_DETECTIONS", items });
+    console.log("Final Items Payload:", items);
+    console.groupEnd();
+
+    // The Wake-Up Fix: Using a callback forces Chrome to wake the background Service Worker
+    chrome.runtime.sendMessage({ type: "TECH_DETECTIONS", items }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error("[Awin Helper] Background Connection Failed:", chrome.runtime.lastError.message);
+      } else {
+        console.log("✅ [Awin Helper] Successfully sent to background!");
+      }
+    });
   }
 
-  const run = () => detectAll().catch(() => {});
+  const run = () => detectAll().catch(e => console.error("[Awin Helper] Fatal Run Error:", e));
 
   // ==========================================
-  // 6. EVENT LISTENERS & TRIGGERS
+  // 6. EVENT LISTENERS
   // ==========================================
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", run, { once: true });
@@ -187,22 +184,24 @@
 
   chrome.runtime.onMessage.addListener((msg) => { if (msg?.type === 'REDETECT_NOW') run(); });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') run(); });
-  window.addEventListener('pageshow', (e) => { if (e.persisted) run(); });
+  
+  try {
+    let lastUrl = location.href;
+    const fireOnNav = () => { if (location.href !== lastUrl) { lastUrl = location.href; run(); } };
+    const { pushState, replaceState } = history;
+    history.pushState = function () { pushState.apply(this, arguments); fireOnNav(); };
+    history.replaceState = function () { replaceState.apply(this, arguments); fireOnNav(); };
+    window.addEventListener("popstate", fireOnNav);
+  } catch (e) { console.warn("[Awin Helper] SPA routing binding skipped", e); }
 
-  // SPA Navigation handling
-  let lastUrl = location.href;
-  const fireOnNav = () => {
-    if (location.href !== lastUrl) { lastUrl = location.href; run(); }
-  };
-  history.pushState = new Proxy(history.pushState, { apply: (tgt, thisArg, argArray) => { tgt.apply(thisArg, argArray); fireOnNav(); }});
-  history.replaceState = new Proxy(history.replaceState, { apply: (tgt, thisArg, argArray) => { tgt.apply(thisArg, argArray); fireOnNav(); }});
-  window.addEventListener("popstate", fireOnNav);
-
-  // Clean debounced MutationObserver
-  let debounceTimer;
+  let debounceTimer = null;
+  let isThrottled = false;
   new MutationObserver(() => {
+    if (isThrottled) return;
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(run, 500);
+    debounceTimer = setTimeout(() => {
+      isThrottled = true; run(); setTimeout(() => { isThrottled = false; }, 1500); 
+    }, 500);
   }).observe(document.documentElement, { childList: true, subtree: true });
 
 })();

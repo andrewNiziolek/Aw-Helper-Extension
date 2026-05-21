@@ -163,7 +163,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     const tabId = sender?.tab?.id;
     if (Number.isInteger(tabId)) {
       setDetections(tabId, msg.items || []).then(() => setBadge(tabId, msg.items?.length || 0));
+      sendResponse({ success: true });
     }
+    return true;
   }
   if (msg?.type === 'GET_TECH_DETECTIONS') {
     const tabId = msg.tabId;
