@@ -1,5 +1,5 @@
-// Generic Controllers & Helpers
-// === Action on Enter Press ===
+// === Generic Controllers & Helpers ===
+// Action on Enter Press
 function enterControl(openCol, btnPoint, kbKey) {
     if (kbKey.key == "Enter") {
         const isOpen =
@@ -13,7 +13,7 @@ function enterControl(openCol, btnPoint, kbKey) {
     }
 };
 
-// Core Actions
+// === Core Actions ===
 function sendImplMID(MIDValue) {
     chrome.runtime.sendMessage({action: "createNewImplTabs", mid: MIDValue });
 }
@@ -22,9 +22,7 @@ function sendIRMID(MIDValue) {
     chrome.runtime.sendMessage({ action: "createIRTabs", mid: MIDValue });
 }
 
-// ===============
-// Pop-up Triggers
-// ===============
+// === Pop-up Triggers===
 
 //New Implementation Tool
 const implMIDBox = document.getElementById("");
@@ -74,9 +72,7 @@ testURLCollapse?.addEventListener("keydown", (e) => {
     enterControl(testURLCollapse, testURLBtn, e);
 });
 
-// ===============
-// Dynamic Page Triggers or Injections
-// ===============
+// === Dynamic Page Triggers or Injections ===
 
 //AWC Chip Injecting and Binding
 const tryBindAwcChip = (chipEl) => {
