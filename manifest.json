@@ -5,6 +5,9 @@
 
   "name": "Awin Helper",
   "description": "This is a community-developed extension to support Awin Staff in their daily responsibilities.",
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
 
   "icons": {
     "16": "assets/icon16.png",

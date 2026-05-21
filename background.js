@@ -186,6 +186,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       setDetections(tabId, msg.items || []).then(() => setBadge(tabId, msg.items?.length || 0));
     }
   }
+  // Fingerprint: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
   if (msg?.type === 'GET_TECH_DETECTIONS') {
     const tabId = msg.tabId;
     (async () => {
@@ -198,6 +199,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })();
     return true; // async
   }
+
 });
 
 // Keep badge coherent when focus changes
@@ -229,4 +231,3 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
     // content script will re-emit on DOMContentLoaded; if it doesn’t, popup will ping via GET handler
   }
 });
-
