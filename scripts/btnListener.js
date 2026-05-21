@@ -54,6 +54,26 @@ irCollapse?.addEventListener("keydown", (e) => {
     enterControl(irCollapse, irBtn, e);
 });
 
+// Test URL Tool
+const testURLMIDBox = document.getElementById("");
+const testURLBtn = document.getElementById("");
+const testURLCollapse = document.getElementById("");
+
+function createtestTabs(MID) {
+    const URL = [`http://awin1.com/awclick.php?mid=${MID}&id=45628&clickref=TESTURLGen`];
+
+    chrome.tabs.create({URL});
+}
+
+testURLBtn?.addEventListener("click", () => {
+    const saniTestMID = testURLMIDBox.value.replace(/\D/g, "");
+    if (saniTestMID) createtestTabs(saniTestMID);
+})
+
+testURLCollapse?.addEventListener("keydown", (e) => {
+    enterControl(testURLCollapse, testURLBtn, e);
+});
+
 // ===============
 // Dynamic Page Triggers or Injections
 // ===============
