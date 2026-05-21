@@ -13,6 +13,13 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
+//Theme Controller
+function switchTheme(theme) {
+  document.body.classList = theme
+}
+
+// Call switchTheme("theme-dark") or not as necessary. Build indicator in UI for this controll and have it's storage state control this call on extension load.
+
 // Link Version Display in popup to manifest version number.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.getVersion) {

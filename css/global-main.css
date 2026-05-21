@@ -9,12 +9,16 @@
     --gray-medium: #777573;
     --gray-strong: #3e3c3b;
     --black-ref: #101010;
+}
 
+body{
     /*Default Light Mode Colors*/
     --bg-main: var(--gray-light);
     --font-col: var(--black-ref);
     --accent: var(--orange);
     --btn-bg: var(--orange-strong);
+    --tool-bg: var(--gray-strong);
+    --panel-border: var(--gray-medium);
 }
 
 .theme-dark{
@@ -22,6 +26,64 @@
     --font-col: var(--gray-light);
     --accent: var(--orange-strong);
     --btn-bg: var(--orange-dark);
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--tool-bg);
+  color: var(--font-col);
+  padding: 5px;
+  border-radius: 3px;
+  white-space: normal;
+  max-width: 240px;
+  text-align: center;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+}
+
+.chipEasy{
+  background-color: #18a45b;
+}
+
+.chipModerate{
+  background-color: #d99b15;
+}
+
+.chipDifficult{
+  background-color: #DE0732;
+}
+
+.chipRating{
+  color: var(--orange-strong);
+  height: 7px;
+  width: 7px;
+  background-color: var(--orange-strong);
+  border-radius: 5px;
+  margin-right: 5px;
+}
+
+.chip .chipIcon{
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.chip .chipIcon use,
+.chip .chipIcon path,
+.chip .chipIcon svg{
+  fill: currentColor;
 }
 
 /*Ref Aw Colors*/
