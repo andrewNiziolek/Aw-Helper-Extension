@@ -8,8 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const ratingDiv = document.getElementById('ratingBox');
 
     // Function to update the visibility of page elements.
+
     function updateButtonVisibility() {
-        if (modeSwitch.checked) {
+        if (modeSwitch?.checked) {
             // If tech mode enabled, display (block/flex) or hide (none) these elements.
             // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
             newImplView.style.display = 'block';
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Save the state of the checkbox and update element visibility when it is changed
-    modeSwitch.addEventListener('change', function() {
+    modeSwitch?.addEventListener('change', function() {
         chrome.storage.local.set({modeSwitch: modeSwitch.checked}, function() {
             updateButtonVisibility();
         });

@@ -5,21 +5,23 @@
     --orange: #FF7D28;
     --orange-strong: #FF6600;
     --orange-dark: #af4600;
-    --gray-light: #f8f4f0;
+    --white-custom: #f8f4f0;
+    --gray-light: #a1a1a1;
     --gray-medium: #777573;
     --gray-strong: #3e3c3b;
     --black-ref: #101010;
 
     --shadow-gray: 0px 5px 5px rgba(0, 0, 0, 0.2);
 
-    --bg-main: var(--gray-light);
+    --bg-main: var(--white-custom);
+    --bg-accent: var(--gray-light);
     --font-col: var(--black-ref);
-    --font-alt-col: var(--gray-light);
+    --font-alt-col: var(--white-custom);
     --accent: var(--orange);
 
     --btn-bg: var(--orange-pale);
-    --btn-acc: var(--gray-light);
-    --btn-white: var(--gray-light);
+    --btn-acc: var(--white-custom);
+    --btn-white: var(--white-custom);
 
     --tool-bg: var(--gray-strong);
     --panel-border: white;
@@ -43,7 +45,7 @@ body{
 
 .theme-dark{
     --bg-main: var(--gray-strong);
-    --font-col: var(--gray-light);
+    --font-col: var(--white-custom);
     --accent: var(--orange-strong);
     --btn-bg: var(--orange-dark);
     --btn-acc: var(--orange-strong);

@@ -165,7 +165,7 @@ input:checked + .slider:before {
   height: 40px;
   color: var(--font-col);
   border: none;
-  background-color: var(--bg-main);
+  background-color: var(--bg-accent);
   box-shadow: var(--shadows); /* Horizontal offset, Vertical offset, Blur radius, Color */
 }
 
@@ -463,10 +463,10 @@ input:checked + .slider:before {
   animation: flashBg 900ms ease;
 }
 @keyframes flashBg {
-  0%   { background-color: var(--gray-light); }
+  0%   { background-color: var(--white-custom); }
   20%  { background-color: var(--accent); }
   80%  { background-color: var(--accent); }
-  100% { background-color: var(--gray-light); }
+  100% { background-color: var(--white-custom); }
 }
 
 /* During flash: text + icon color change */
