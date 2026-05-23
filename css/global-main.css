@@ -1,31 +1,63 @@
 /* Global CSS Components*/
 
-:root{
-    --orange-pale: #FF9550;
-    --orange: #FF7D28;
-    --orange-strong: #FF6600;
-    --orange-dark: #af4600;
-    --white-custom: #f8f4f0;
-    --gray-light: #a1a1a1;
-    --gray-medium: #777573;
-    --gray-strong: #3e3c3b;
-    --black-ref: #101010;
+:root {
+  /* 1. Core Palette */
+  --color-orange-light: #FF9550;
+  --color-orange-base: #FF7D28;
+  --color-orange-dark: #FF6600;
+  --color-orange-darker: #af4600;
 
-    --shadow-gray: 0px 5px 5px rgba(0, 0, 0, 0.2);
+  --color-white: #ffffff;
+  --color-off-white: #f8f4f0;
+  --color-gray-100: #e5e5e5;
+  --color-gray-300: #a1a1a1;
+  --color-gray-500: #777573;
+  --color-gray-800: #3e3c3b;
+  --color-black: #101010;
 
-    --bg-main: var(--white-custom);
-    --bg-accent: var(--gray-light);
-    --font-col: var(--black-ref);
-    --font-alt-col: var(--white-custom);
-    --accent: var(--orange);
+  --color-error: #d32f2f;
+  --color-success: #2e7d32;
 
-    --btn-bg: var(--orange-pale);
-    --btn-acc: var(--white-custom);
-    --btn-white: var(--white-custom);
+  /* 2. Semantic Tokens */
+  --bg-body: var(--color-off-white);
+  --bg-surface: var(--color-white);
+  --bg-surface-alt: var(--color-gray-100);
+  --bg-tooltip: var(--color-gray-800);
 
-    --tool-bg: var(--gray-strong);
-    --panel-border: white;
-    --shadows: var(--shadow-gray)
+  --text-primary: var(--color-black);
+  --text-secondary: var(--color-gray-500);
+  --text-inverse: var(--color-white);
+  --text-accent: var(--color-orange-dark);
+
+  --border-subtle: var(--color-gray-100);
+  --border-base: var(--color-gray-300);
+  --border-focus: var(--color-orange-base);
+
+  /* 3. Component Tokens */
+  --btn-primary-bg: var(--color-orange-base);
+  --btn-primary-hover: var(--color-orange-dark);
+  --btn-primary-text: var(--color-white);
+  
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: var(--color-gray-300);
+  --btn-secondary-hover: var(--color-gray-100);
+
+  --input-bg: var(--color-white);
+  --input-border: var(--border-base);
+  --input-text: var(--text-primary);
+  --input-focus-ring: 0 0 0 3px rgba(255, 125, 40, 0.2);
+
+  --link-color: var(--color-orange-dark);
+  --link-hover: var(--color-orange-darker);
+
+  /* 4. Effects & Spatial */
+  --shadow-sm: 0 2px 4px rgba(16, 16, 16, 0.05);
+  --shadow-md: 0 5px 10px rgba(16, 16, 16, 0.15);
+  --shadow-lg: 0 10px 25px rgba(16, 16, 16, 0.2);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-round: 50%;
 }
 
 html{
