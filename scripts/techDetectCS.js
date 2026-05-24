@@ -1,9 +1,7 @@
 (() => {
   console.log("🛠️ [Awin Helper] Tech Detection Script Injected");
 
-  // ==========================================
-  // 1. REGISTRIES & CONFIG
-  // ==========================================
+  //REGISTRIES & CONFIG
   const CMP_REGISTRY = [
     { id: 'onetrust', name: 'OneTrust', priority: 10, scripts: [/(^|:\/\/)cdn\.cookielaw\.org\/.*\/otSDKStub\.js(?:\?.*)?$/i, /(^|:\/\/)optanon\.blob\.core\.windows\.net\//i, /(^|:\/\/).*\.onetrust\.com\//i], globals: ['OneTrust', 'OptanonActiveGroups', 'Optanon'] },
     { id: 'cookiebot', name: 'Cookiebot', priority: 20, scripts: [/(^|\/\/)consent\.cookiebot\.com\/uc\.js/i, /(^|\/\/).*\.cookiebot\.com\//i], globals: ['Cookiebot'] },
@@ -28,9 +26,7 @@
     }
   ];
 
-  // ==========================================
-  // 2. UTILITIES
-  // ==========================================
+  // UTILITIES
   const safeURL = (src) => {
     try { return src ? new URL(src, location.href) : null; } catch { return null; }
   };
@@ -55,9 +51,7 @@
     });
   };
 
-  // ==========================================
-  // 3. THE SINGLE-PASS SCANNER
-  // ==========================================
+  // SINGLE-PASS SCANNER
   function scanPageEnvironment() {
     const data = {
       scriptUrls: [], gtmId: "", sgtmHost: false, dwinUrls: [],
@@ -111,9 +105,7 @@
     return data;
   }
 
-  // ==========================================
-  // 4. CMP DETECTOR
-  // ==========================================
+  //CMP DETECTOR
   function detectCMPProviders(scriptUrls) {
     const found = [];
 
@@ -135,10 +127,14 @@
     return { providers: uniq.map(x => x.name), tooltip: uniq.map(x => x.name).join(', ') };
   }
 
-  // ==========================================
-  // 5. MAIN EXECUTION
-  // ==========================================
+  // MAIN EXECUTION
   async function detectAll() {
+
+    if (!chrome.runtime?.id) {
+    console.warn("Awin Helper: Extension updated. Please refresh the page.");
+    return;
+    }
+
     console.group("[Awin Helper] Detection Run");
     const env = scanPageEnvironment();
     console.log("Raw Scanned Data:", env);
@@ -161,7 +157,6 @@
     console.log("Final Items Payload:", items);
     console.groupEnd();
 
-    // The Wake-Up Fix: Using a callback forces Chrome to wake the background Service Worker
     chrome.runtime.sendMessage({ type: "TECH_DETECTIONS", items }, (response) => {
       if (chrome.runtime.lastError) {
         console.error("[Awin Helper] Background Connection Failed:", chrome.runtime.lastError.message);
@@ -173,9 +168,7 @@
 
   const run = () => detectAll().catch(e => console.error("[Awin Helper] Fatal Run Error:", e));
 
-  // ==========================================
-  // 6. EVENT LISTENERS
-  // ==========================================
+  //EVENT LISTENERS
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", run, { once: true });
   } else {
