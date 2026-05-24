@@ -8,7 +8,7 @@ const CHIP_TEXT = { info:"Info",      warning:"Attention",  critical:"Important"
 
 initAnnouncement();
 
-async function initAnnouncement() {
+async function initAnnouncement(testItems = null) {
   const mount = document.getElementById("announceMount");
   const more  = document.getElementById("announceMore");
   if (!mount || !more) return;
@@ -16,14 +16,20 @@ async function initAnnouncement() {
   const { dismissedAnnIds = [] } = await chrome.storage.local.get("dismissedAnnIds");
 
   let items = [];
-  try {
-    const res = await fetch(ANN_ENDPOINT, { cache: "no-store" });
-    if (res.ok) {
-      const data = await res.json();
-      items = Array.isArray(data?.items) ? data.items : [];
+  
+  // 2. BYPASS fetch if we are passing in test items
+  if (testItems) {
+    items = testItems;
+  } else {
+    try {
+      const res = await fetch(ANN_ENDPOINT, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        items = Array.isArray(data?.items) ? data.items : [];
+      }
+    } catch {
+      // offline? keep hidden
     }
-  } catch {
-    // offline? keep hidden
   }
 
   const now = Date.now();
@@ -80,7 +86,7 @@ async function initAnnouncement() {
     </svg>
   `;
 
-  //Expandable "More" panel
+  // Expandable "More" panel
   more.innerHTML = `
     <div class="announceMore__inner">
       <div class="announceMore__body">${escapeHtml(it.body || "")}</div>
@@ -91,7 +97,17 @@ async function initAnnouncement() {
     </div>
   `;
 
-  // Toggle behavior: clicking the bar opens/closes the extra panel
+  // Prevent duplicate event listeners during consecutive tests
+  if (mount.dataset.abortId) {
+    window[`abort_ann_${mount.dataset.abortId}`]?.abort();
+  }
+  const abortId = Date.now();
+  mount.dataset.abortId = abortId;
+  const controller = new AbortController();
+  window[`abort_ann_${abortId}`] = controller;
+  const { signal } = controller;
+
+  // Toggle behavior
   let open = false;
   const toggle = () => {
     open = !open;
@@ -99,10 +115,11 @@ async function initAnnouncement() {
     mount.setAttribute("aria-expanded", String(open));
   };
 
-  mount.addEventListener("click", toggle);
+  mount.addEventListener("click", toggle, { signal });
   mount.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
-  });
+  }, { signal });
+  
   mount.setAttribute("role","button");
   mount.setAttribute("tabindex","0");
   mount.setAttribute("aria-expanded","false");
@@ -119,7 +136,7 @@ async function initAnnouncement() {
     mount.removeAttribute("aria-expanded");
     if (textEl) textEl.textContent = "";
     if (chipEl)  chipEl.innerHTML = "";
-  });
+  }, { signal });
 }
 
 function escapeHtml(s=""){ return String(s).replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
@@ -130,3 +147,22 @@ function semverLt(a,b){
   for (let i=0;i<3;i++){ if((pa[i]||0)!==(pb[i]||0)) return (pa[i]||0)<(pb[i]||0); }
   return false;
 }
+
+// --- DEVELOPMENT TESTING TOOL
+window.testAnnouncement = function(customData = {}) {
+  const mockItem = {
+    id: "debug-" + Date.now(),
+    active: true,
+    class: customData.class || "critical", // Try "info", "warning", or "critical"
+    title: customData.title || "Offline Test Announcement",
+    body: customData.body || "This is a forced announcement for local testing without modifying the JSON.",
+    url: customData.url || "https://example.com",
+    ...customData
+  };
+  
+  console.log("Triggering test announcement:", mockItem);
+  initAnnouncement([mockItem]);
+};
+
+/* Use of test announcement:
+Console > testAnnouncement(), testAnnouncement({ class: "warning", title: "Testing warning styles!" }), testAnnouncement({ url: null, body: "Look ma, no button." }) */
