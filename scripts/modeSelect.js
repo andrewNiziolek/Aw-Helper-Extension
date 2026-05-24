@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modeSwitch = document.getElementById('modeSwitch');
     const newImplView = document.getElementById('newImplView');
     const intReviewView = document.getElementById('intReviewView');
-    const testURLTech = document.getElementById('testURLTech');
+    const testURLView = document.getElementById('testURLView');
     const clipboardView = document.getElementById('clipboard');
     const compatibleView = document.getElementById('compatibleBox');
     const ratingDiv = document.getElementById('ratingBox');
@@ -15,14 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
             newImplView.style.display = 'block';
             intReviewView.style.display = 'block';
-            testURLTech.style.display = 'block';
+            testURLView.style.display = 'block';
             clipboardView.style.display = 'block';
             compatibleView.style.display = 'none';
             ratingDiv.style.display = 'none';
         } else { // If simple mode enabled...
             newImplView.style.display = 'none';
             intReviewView.style.display = 'none';
-            testURLTech.style.display = 'none';
+            testURLView.style.display = 'none';
             clipboardView.style.display = 'none';
             compatibleView.style.display = 'flex';
             ratingDiv.style.display = 'flex';

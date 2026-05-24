@@ -62,7 +62,8 @@ function enterControl(openCol, btnPoint, kbKey) {
 
 // === Core Actions ===
 function sendImplMID(MIDValue) {
-    chrome.runtime.sendMessage({action: "createNewImplTabs", mid: MIDValue });
+    chrome.runtime.sendMessage({action: "createNITabs", mid: MIDValue });
+    console.log("NewImpl Message Sent");
 }
 
 function sendIRMID(MIDValue) {
@@ -72,42 +73,42 @@ function sendIRMID(MIDValue) {
 // === Pop-up Triggers===
 
 //New Implementation Tool
-const implMIDBox = document.getElementById("");
-const implBtn = document.getElementById("");
-const implCollapse = document.getElementById("");
+const implMIDBox = document.getElementById("implMIDBox");
+const implBtn = document.getElementById("newImplBtn");
+const implCollapse = document.getElementById("newImplView");
 
 implBtn?.addEventListener("click", () => {
     const saniImplMID = implMIDBox.value.replace(/\D/g, "");
     if (saniImplMID) sendImplMID(saniImplMID);
 });
 
-implCollapse?.addEventListener("keydown", (e) => {
+implMIDBox?.addEventListener("keydown", (e) => {
     enterControl(implCollapse, implBtn, e);
 });
 
 // Internal Review Tool
-const irMIDBox = document.getElementById("");
-const irBtn = document.getElementById("");
-const irCollapse = document.getElementById("");
+const irMIDBox = document.getElementById("inRevMIDBox");
+const irBtn = document.getElementById("intRevBtn");
+const irCollapse = document.getElementById("intReviewView");
 
 irBtn?.addEventListener("click", () => {
     const saniIRMID = irMIDBox.value.replace(/\D/g, "");
     if (saniIRMID) sendIRMID(saniIRMID);
 });
 
-irCollapse?.addEventListener("keydown", (e) => {
+irMIDBox?.addEventListener("keydown", (e) => {
     enterControl(irCollapse, irBtn, e);
 });
 
 // Test URL Tool
-const testURLMIDBox = document.getElementById("");
-const testURLBtn = document.getElementById("");
-const testURLCollapse = document.getElementById("");
+const testURLMIDBox = document.getElementById("testURLMID");
+const testURLBtn = document.getElementById("testURLBtn");
+const testURLCollapse = document.getElementById("testURLView");
 
 function createtestTabs(MID) {
-    const URL = [`http://awin1.com/awclick.php?mid=${MID}&id=45628&clickref=TESTURLGen`];
+    const test_URL = `http://awin1.com/awclick.php?mid=${MID}&id=45628&clickref=TESTURLGen`;
 
-    chrome.tabs.create({URL});
+    chrome.tabs.create({ url: test_URL});
 }
 
 testURLBtn?.addEventListener("click", () => {
@@ -115,7 +116,7 @@ testURLBtn?.addEventListener("click", () => {
     if (saniTestMID) createtestTabs(saniTestMID);
 })
 
-testURLCollapse?.addEventListener("keydown", (e) => {
+testURLMIDBox?.addEventListener("keydown", (e) => {
     enterControl(testURLCollapse, testURLBtn, e);
 });
 

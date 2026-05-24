@@ -95,7 +95,7 @@ function createTabGroup(urls, mid, toolName) {
           if (toolName == "irTool") {
             chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: 'orange' });
           }
-          chrome.tabGroups.update(groupId, { title: tabMID, color: 'orange' });
+          chrome.tabGroups.update(groupId, { title: mid, color: 'orange' });
         });
       }
     });
@@ -120,7 +120,7 @@ chrome.runtime.onMessage.addListener((request) => {
     `https://ui.awin.com/provider/pre-join-publishers?advertiserId=${MIDValue}`
   ];
 
-  createTabGroups(URLs, MIDValue, "implTool");
+  createTabGroup(URLs, MIDValue, "implTool");
 });
 
 // Internal Review Tool
@@ -142,7 +142,7 @@ chrome.runtime.onMessage.addListener((request) => {
     `https://ui.awin.com/provider/migrated-advertiser-settings/${MIDValue}`
   ];
 
-  createTabGropus(URLs, MIDValue, "irTool");
+  createTabGroup(URLs, MIDValue, "irTool");
 });
 
 // Tech Detection Script Listeners and Badge
