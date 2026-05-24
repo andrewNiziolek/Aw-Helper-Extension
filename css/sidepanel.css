@@ -1,6 +1,4 @@
-/* =========================================
-   OVERRIDE GLOBAL SIZING
-========================================= */
+/* Override Global Sizing */
 html, body {
   margin: 0;
   padding: 0;
@@ -9,22 +7,18 @@ html, body {
   box-sizing: border-box;
 }
 
-/* =========================================
-   MAIN PANEL WRAPPER
-========================================= */
+/* Main Panel Wrapper */
 .panel-container {
-  background-color: var(--bg-main, #f8f4f0);
+  background-color: var(--bg-body, #f8f4f0);
   display: flex;
   flex-direction: column;
   height: 100%;
   border-radius: 12px;
-  box-shadow: var(--shadows, 0px 5px 15px rgba(0, 0, 0, 0.3));
+  box-shadow: var(--shadow-lg);
   overflow: hidden; 
 }
 
-/* =========================================
-   THIN GRADIENT HEADER
-========================================= */
+/* Thin Gradient Header */
 @keyframes scrollGradient {
   0% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
@@ -46,9 +40,7 @@ html, body {
   border-radius: 0 0 12px 12px; 
 }
 
-/* =========================================
-   MAIN BODY & LAYOUT
-========================================= */
+/* Main Body & Layout */
 .panel-body {
   flex: 1;
   overflow-y: auto;
@@ -60,23 +52,13 @@ html, body {
   border-radius: 12px 12px 0 0;
 }
 
-/* =========================================
-   INNER CARDS
-========================================= */
+/* Inner Cards */
 .inner-card {
-  /* 1. A highly transparent background color (white at 15% opacity) */
   background-color: rgba(255, 255, 255, 0.15); 
-  
-  /* 2. The magic frosted blur effect */
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); /* Safari support */
-  
-  /* 3. A subtle, semi-transparent white border to simulate the "edge" of the glass */
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  
-  /* 4. A soft shadow to lift the glass off the background */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
-  
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   border-radius: 12px; 
   padding: 16px;
 }
@@ -84,13 +66,13 @@ html, body {
 .inner-card h3 {
   margin: 0 0 10px 0;
   font-size: 14px;
-  color: var(--font-col, #101010);
-  border-bottom: 1px solid var(--gray-light, #a1a1a1);
+  color: var(--text-primary, #101010);
+  border-bottom: 1px solid var(--border-base, #a1a1a1);
   padding-bottom: 6px;
 }
 
 .inner-card p {
   margin: 0;
   font-size: 13px;
-  color: var(--gray-strong, #3e3c3b);
+  color: var(--text-secondary, #777573);
 }
