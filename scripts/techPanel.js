@@ -1,19 +1,34 @@
 // scripts/techPanel.js
-(async () => {
+
+// Map your background script item IDs to your TECH_CONFIG keys
+const ID_TO_CONFIG = {
+  'dwin1': 'awc',
+  'gtm': 'gtm',
+  'gtss': 'gtSS',
+  'shopify': 'shopify',
+  'adobe_launch': 'launch',
+  'woocommerce': 'wooComm',
+  'tealium': 'tealium',
+  'cmp': 'consent',
+  'magento': 'magento'
+};
+
+async function updateSidePanel() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab) return;
   const url = tab.url || "";
 
   const blocklist = ["chrome://", "edge://", "awin.com", "google.com", "microsoftedge", "force.com"];
-
   const compatText = document.getElementById("compatData");
   const siteURLText = document.getElementById("siteURLText");
   const modeCheck = document.getElementById("modeSwitch");
+  const container = document.getElementById("techContainer");
 
   const isBlocked = blocklist.some(d => url.includes(d));
   if (isBlocked) {
     if (compatText) { compatText.textContent = "Restricted URL"; compatText.style.fontStyle = "italic"; }
     if (siteURLText) siteURLText.textContent = "Restricted URL";
+    if (container) container.innerHTML = "";
     return;
   }
 
@@ -48,100 +63,78 @@
     items = resp2.items || [];
   }
 
-  // compatibility banner if not in "technician" mode
+  // Compatibility banner if not in "technician" mode
   if (!modeCheck?.checked && items.some(i => /^(gtm|gtss|shopify|woocommerce)$/.test(i.id))) {
     const easeMSG = document.getElementById("ratingBox");
-    if (compatText) { compatText.textContent = "Site is compatible!"; compatText.style.fontWeight = "bold"; compatText.style.color = "#18a45b"; }
+    if (compatText) { 
+      compatText.textContent = "Site is compatible!"; 
+      compatText.style.fontWeight = "bold"; 
+      compatText.style.color = "#18a45b"; 
+    }
     if (easeMSG) easeMSG.style.display = "flex";
   }
 
-  // helpers
-  const show = (id, text = null) => {
-    const panel = document.getElementById(id);
-    if (!panel) return;
-    panel.style.display = "grid";
-    if (text) {
-      const el = document.getElementById(text.id);
-      if (el) el.textContent = text.value;
-    }
-  };
+  // --- DYNAMIC RENDERING ---
+  if (!container) return;
+  container.innerHTML = ""; // Clear old data on refresh
 
-  let _shopifyDetected = false;
-  let _shopifyDomain = '';
+  const techMode = !!modeCheck?.checked;
+  let shopifyDomain = "";
 
-  const setDisplay = (id, on) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = on ? 'grid' : 'none';
-  };
+  items.forEach(it => {
+    const configKey = ID_TO_CONFIG[it.id];
+    if (!configKey || !TECH_CONFIG[configKey]) return;
 
-  function renderShopifyRow() {
-    // hide/show the whole row based on detection
-    setDisplay('shopifyDisplay', _shopifyDetected);
+    const tech = TECH_CONFIG[configKey];
+    let chipText = tech.chipText;
+    let tooltipAttr = "";
+    let tooltipClass = "";
 
-    if (!_shopifyDetected) {
-      setDisplay('myShopifyInfo', false);
-      return;
-    }
-
-    const techMode = !!modeCheck?.checked;
-    setDisplay('myShopifyInfo', techMode);
-
-    if (techMode) {
-      const t = document.getElementById('myShopifyText');
-      if (t) t.textContent = _shopifyDomain || '';
-      shInitShopifyCopy();
-    }
-  }
-  
-  // react to toggle immediately
-  modeCheck?.addEventListener('change', renderShopifyRow);
-  modeCheck?.addEventListener('input', renderShopifyRow);
-
-  // render detections
-  for (const it of items) {
-    if (it.id === "gtm") {
-      show("gtmDisplay", { id: "gtmText", value: it.label });
-    }
-    if (it.id === "gtss") {
-      show("gtSSDisplay", { id: "gtSSText", value: "GTM Server-Side" });
-    }
-    if (it.id === 'shopify') {
-      _shopifyDetected = true;
-      _shopifyDomain = it.meta?.shopifyDomain || '';
-    }
-    if (it.id === "adobe_launch") {
-      show("launchDisplay", { id: "launchText", value: "Adobe Launch" });
-    }
-    if (it.id === "woocommerce") {
-      show("wooCommDisplay", { id: "wooCommStatus", value: "WooCommerce" });
-    }
-    if (it.id === "tealium") {
-      show("tealiumDisplay", { id: "tealiumText", value: it.label });
-    }
-    if (it.id === 'cmp') {
-      show('consentDisplay', { id: 'consentText', value: 'Cookie Consent' }); // title stays
-      const chip = document.getElementById('consentChip');
-      if (chip && it.meta?.tooltip) {
-        chip.setAttribute('data-tooltip', it.meta.tooltip);
-        chip.classList.add('tooltip');
-      }
-    }
+    // 1. Custom Logic: Awin Mastertag Multi-tag tooltip & count
     if (it.id === "dwin1") {
-      const chip = document.getElementById("awcChip");
-      const panel = document.getElementById("awcDisplay");
-      if (chip && panel) {
-        const all = it.meta?.all || [];
-        chip.textContent = all.length > 1 ? `${it.label} +${all.length - 1}` : it.label;
-        panel.style.display = "grid";
-        if (all.length > 1) {
-          chip.setAttribute("data-tooltip", all.slice(1).join(", "));
-          chip.classList.add("tooltip");
-        }
+      const all = it.meta?.all || [];
+      chipText = all.length > 1 ? `${it.label} +${all.length - 1}` : it.label;
+      if (all.length > 1) {
+        tooltipAttr = `data-tooltip="${all.slice(1).join(", ")}"`;
+        tooltipClass = "tooltip";
       }
+    } 
+    // 2. Custom Logic: CMP Tooltip
+    else if (it.id === "cmp" && it.meta?.tooltip) {
+      tooltipAttr = `data-tooltip="${it.meta.tooltip}"`;
+      tooltipClass = "tooltip";
+    } 
+    // 3. Custom Logic: Shopify Domain extraction
+    else if (it.id === "shopify") {
+      shopifyDomain = it.meta?.shopifyDomain || '';
     }
+
+    // Inject the main Tech row
+    container.innerHTML += `
+      <div class="techDisplay" id="${configKey}Display" style="display: flex;">
+          <div class="techIcon">${tech.svg}</div>
+          <div class="techData">
+              <p class="techReadout" id="${configKey}Text">${tech.name}</p>
+          </div>
+          <span class="chip ${tech.chipClass} ${tooltipClass}" id="${configKey}Chip" ${tooltipAttr}>${chipText}</span>
+      </div>
+    `;
+
+    // Inject Shopify Additional Info (Only if Tech Mode is ON)
+    if (it.id === "shopify" && techMode && shopifyDomain) {
+      container.innerHTML += `
+        <div class="techAdditionalInfo" id="myShopifyInfo" style="display: flex;">
+            <p class="techAdditionalText" id="myShopifyText">${shopifyDomain}</p>
+        </div>
+      `;
+    }
+  });
+
+  // Re-bind the click-to-copy function if Shopify info was rendered
+  if (shopifyDomain && techMode) {
+    shInitShopifyCopy();
   }
-  renderShopifyRow();
-})();
+}
 
 // --- Shopify "click-to-copy" helper ---
 function shInitShopifyCopy() {
@@ -165,11 +158,13 @@ function shInitShopifyCopy() {
     textEl.appendChild(span);
   }
 
-  if (textEl.__shBound) return;
-  textEl.__shBound = true;
+  // Prevent stacking event listeners on re-renders
+  if (textEl.dataset.shBound) return;
+  textEl.dataset.shBound = "true";
 
   textEl.addEventListener("click", async () => {
-    const value = (textEl.textContent || "").trim();
+    // Trim out the SVG markup to just get the text node value
+    const value = textEl.childNodes[0]?.nodeValue?.trim() || "";
     if (!value) return;
 
     try {
@@ -201,3 +196,24 @@ window.__awin_helper_meta = {
   license: "AGPL-3.0",
   fingerprint: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 };
+
+
+// ==========================================
+// EVENT LISTENERS & INITIALIZATION
+// ==========================================
+
+// Re-render when toggling Tech Mode
+document.getElementById("modeSwitch")?.addEventListener("change", updateSidePanel);
+
+// Re-render when the user switches to a different tab
+chrome.tabs.onActivated.addListener(updateSidePanel);
+
+// Re-render when the current tab finishes loading/navigating
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && tab.active) {
+    updateSidePanel();
+  }
+});
+
+// Initial run when the side panel is first opened
+updateSidePanel();
