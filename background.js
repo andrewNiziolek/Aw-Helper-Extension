@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 // New update page popup.
-let disableUpdatePopup = "1";
+let disableUpdatePopup = "0";
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === "update" && disableUpdatePopup === "0") {
     chrome.tabs.create({ url: "https://aniziolek.notion.site/Awin-Helper-Updates-1ec7c46530f34c3691e307f498284fd4?pvs=74", active: true }, (tab) => {
@@ -50,13 +50,6 @@ async function migrateStorageKeys() {
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === "update") migrateStorageKeys();
 });
-
-//Theme Controller
-function switchTheme(theme) {
-  document.body.classList = theme
-}
-
-// Call switchTheme("theme-dark") or not as necessary. Build indicator in UI for this controll and have it's storage state control this call on extension load.
 
 // Link Version Display in popup to manifest version number.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
