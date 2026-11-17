@@ -10,6 +10,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="scripts/theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="assets/icon.png" />
   <link rel="stylesheet" href="css/global-main.css">
@@ -25,7 +26,14 @@
       <h1 class="dockHead__text">Awin Helper</h1>
       <span class="dockHead__label">Dock</span>
     </div>
-    <p class="headVer">x.x</p>
+    <div class="dockHead__actions">
+      <div class="themeSwitch" role="radiogroup" aria-label="Theme">
+        <button type="button" class="themeSwitch__btn" role="radio" data-theme-value="system">System</button>
+        <button type="button" class="themeSwitch__btn" role="radio" data-theme-value="light">Light</button>
+        <button type="button" class="themeSwitch__btn" role="radio" data-theme-value="dark">Dark</button>
+      </div>
+      <p class="headVer">x.x</p>
+    </div>
   </header>
   <p class="dockSiteURL" id="dockSiteURL">Loading…</p>
 
@@ -45,8 +53,17 @@
     </section>
 
     <!-- Dock 1: Tools & Test URL Gen (toolHelpers.js) -->
-    <section class="inner-card dockCard">
+    <section class="inner-card dockCard" id="dockTools">
       <h3>Tools</h3>
+
+      <!-- Salesforce page MID -> auto fill New Implementation / Internal Review (sidepanel.js) -->
+      <div class="dockKV is-hidden" id="dockSFMIDRow">
+        <span class="dockKV__key">Salesforce MID</span>
+        <span class="dockKV__val awinMIDRow">
+          <span id="dockSFMID">—</span>
+          <button type="button" class="append-button dockAwin__btn" id="dockSFFillBtn">Auto fill</button>
+        </span>
+      </div>
 
       <button class="collapsible" id="newImplView">
         <span class="collapsible-label">New Implementation</span>

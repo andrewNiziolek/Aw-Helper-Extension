@@ -25,6 +25,7 @@ let dockWindowId = null;
 let dockTabId    = null;
 let dockAwinTab  = null; // Awin UI tab + MID the Provider Area button acts on
 let dockAwinMID  = "";
+let dockSFMID    = ""; // MID published by the Salesforce tab (bootstrap.js -> background.js)
 let refreshSeq   = 0; // bumps on every refresh so stale async results get dropped
 
 // --- HELPERS ---
@@ -264,6 +265,29 @@ function hideAwinUI() {
   document.getElementById("dockAwin")?.classList.add("is-hidden");
 }
 
+// --- Salesforce MID: auto fill New Implementation / Internal Review ---
+function isSalesforceURL(url) { return String(url || "").includes("lightning.force.com"); }
+
+function setSFMID(mid) {
+  const rowEl = document.getElementById("dockSFMIDRow");
+  const midEl = document.getElementById("dockSFMID");
+  dockSFMID = /^\d+$/.test(String(mid || "")) ? String(mid) : "";
+  if (midEl) midEl.textContent = dockSFMID || "—";
+  rowEl?.classList.toggle("is-hidden", !dockSFMID);
+}
+
+async function renderSFMID(tab) {
+  if (!tab || !isSalesforceURL(tab.url)) return setSFMID("");
+  const SF_KEY = "awh_sf_mid_" + tab.id;
+  try {
+    const obj = await chrome.storage.session.get(SF_KEY);
+    if (tab.id !== dockTabId) return; // tab switched while reading
+    setSFMID(obj?.[SF_KEY]?.mid || "");
+  } catch {
+    setSFMID(""); // session storage unavailable; keep the row hidden
+  }
+}
+
 // --- Shopify "click-to-copy" helper ---
 function dkInitShopifyCopy() {
   const textEl = document.getElementById("myShopifyText");
@@ -332,9 +356,11 @@ async function refreshDock() {
     renderRestricted();
     if (awIsAwinUI(url)) renderAwinUI(tab); // detections don't apply, but the Provider Area jump does
     else hideAwinUI();
+    renderSFMID(tab); // Salesforce: offer the page MID to the Tools inputs
     return;
   }
   hideAwinUI();
+  setSFMID("");
 
   try {
     setSiteURL(new URL(url).hostname, false);
@@ -396,9 +422,30 @@ document.getElementById("dockProviderAreaBtn")?.addEventListener("click", () => 
   awOpenProviderArea(dockAwinTab, dockAwinMID);
 });
 
+// Salesforce MID auto fill (bound once; reads the MID from the latest render)
+document.getElementById("dockSFFillBtn")?.addEventListener("click", (e) => {
+  if (!dockSFMID) return;
+  const btnEl = e.currentTarget;
+  ["implMIDBox", "inRevMIDBox"].forEach(id => {
+    const inputEl = document.getElementById(id);
+    if (inputEl) inputEl.value = dockSFMID;
+  });
+  btnEl.textContent = "Filled ✓";
+  clearTimeout(btnEl.__fillTimer);
+  btnEl.__fillTimer = setTimeout(() => { btnEl.textContent = "Auto fill"; }, 1200);
+});
+
 // Live detection results written by background.js
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "session" || dockTabId === null) return;
+
+  const sfChange = changes["awh_sf_mid_" + dockTabId];
+  if (sfChange) {
+    chrome.tabs.get(dockTabId)
+      .then(tab => { if (tab.id === dockTabId && isSalesforceURL(tab.url)) setSFMID(sfChange.newValue?.mid || ""); })
+      .catch(() => setSFMID("")); // tab closed
+  }
+
   const change = changes["awh_det_" + dockTabId];
   if (!change) return;
 

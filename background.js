@@ -66,56 +66,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// --- Replace MIDs with clickable UI links ---
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete" && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      func: transformNumbersToLinks
-    });
-  }
-});
-
-function transformNumbersToLinks() {
-  const replaceNumbers = (rootElement = document) => {
-    rootElement.querySelectorAll("lightning-formatted-text").forEach(element => {
-      // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-      const textContent = element.textContent.trim();
-      if (/^\d+$/.test(textContent)) {  // Check if the content is purely numbers
-        const numberLink = document.createElement("a");
-        numberLink.href = `https://ui.awin.com/dashboard/awin/advertiser/${textContent}`;
-        numberLink.textContent = textContent;
-        numberLink.style.color = "#fc8e45";
-        numberLink.style.textDecoration = "underline";
-        numberLink.target = "_blank"; // Open in a new tab
-        
-        numberLink.title = "Jump to the UI."; // Tooltip text
-
-        element.replaceWith(numberLink);
-      }
-    });
-  };
-
-  // Run once when the script is first injected
-  replaceNumbers();
-
-  // Set up a MutationObserver to monitor for changes in the DOM
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          replaceNumbers(node); // Re-run the replacement function only for added nodes
-        }
-      });
-    });
-  });
-
-  // Start observing the document for changes
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-}
+// TSE__c MID links + IR Start now live in scripts/bootstrap.js / scripts/injected.js
+// fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 
 // Grouped Tab Creator
 function createTabGroup(urls, mid, toolName) {
@@ -204,6 +156,20 @@ function setBadge(tabId, count) {
 
 // Content script reports
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  // Salesforce page MID (bootstrap.js) -> session storage for Dock auto fill
+  if (msg?.type === "AWH_SF_MID") {
+    const tabId = sender?.tab?.id;
+    if (Number.isInteger(tabId)) {
+      const key = "awh_sf_mid_" + tabId;
+      const mid = /^\d+$/.test(String(msg.mid || "")) ? String(msg.mid) : "";
+      (mid
+        ? chrome.storage.session.set({ [key]: { mid, ts: Date.now() } })
+        : chrome.storage.session.remove(key)
+      ).catch(() => {}); // session storage unavailable; Dock just won't offer auto fill
+    }
+    sendResponse({ success: true });
+    return;
+  }
   if (msg?.type === "TECH_DETECTIONS") {
     const tabId = sender?.tab?.id;
     if (Number.isInteger(tabId)) {
@@ -246,7 +212,7 @@ chrome.windows.onFocusChanged.addListener(async () => {
 // Clear state when tabs truly go away or reload
 chrome.tabs.onRemoved.addListener((tabId) => {
   mem.delete(tabId);
-  chrome.storage.session.remove("awh_det_" + tabId);
+  chrome.storage.session.remove(["awh_det_" + tabId, "awh_sf_mid_" + tabId]);
 });
 chrome.tabs.onUpdated.addListener((tabId, info) => {
   if (info.discarded === true) { // tab got discarded
@@ -256,6 +222,7 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
   if (info.status === "loading") {
     mem.delete(tabId);
     chrome.storage.session.remove("awh_det_" + tabId); // don't let Glance render the previous page's cache
+    // awh_sf_mid_ is kept: Lightning SPA navigations can report "loading", and bootstrap.js only republishes on change
     setBadge(tabId, 0);
     // content script will re-emit on DOMContentLoaded; if it doesn’t, popup will ping via GET handler
   }

@@ -1,9 +1,94 @@
+/* css/panel-global.css — light-DOM styles for the Salesforce Lightning card (content-script CSS) */
+
+/* Self-hosted Inter under its own family name so it never collides with the host page */
+@font-face {
+  font-family: "AWH Inter";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/Inter-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: "AWH Inter";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "AWH Inter";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/Inter-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+
 @keyframes scrollGradient {
   0% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-/* Awin Helper SF Panel Header */
+/* Scoped tokens (mirror global-main.css :root; kept off :root so Salesforce is untouched).
+   Custom properties inherit into the card body's shadow root, so sfpanel.css reuses them. */
+#awin-helper-panel,
+[data-awh-mid-link],
+[data-awh-ir-start] {
+  --color-orange-light: #FF9550;
+  --color-orange-base: #FF7D28;
+  --color-orange-dark: #FF6600;
+  --color-orange-darker: #af4600;
+  --color-white: #ffffff;
+  --color-off-white: #f8f4f0;
+  --color-gray-100: #e5e5e5;
+  --color-gray-300: #a1a1a1;
+  --color-gray-500: #777573;
+  --color-black: #101010;
+  --color-dark-900: #161413;
+  --color-dark-800: #1f1c1a;
+  --color-dark-600: #3a3633;
+  --color-dark-500: #57524e;
+  --color-light-text: #f2eee9;
+  --color-light-text-2: #a8a39e;
+
+  /* Theme tokens (mirror global-main.css); light-dark() follows this element's color-scheme */
+  --awh-bg-primary: light-dark(var(--color-off-white), var(--color-dark-900));
+  --awh-surface: light-dark(var(--color-white), var(--color-dark-800));
+  --awh-text-primary: light-dark(var(--color-black), var(--color-light-text));
+  --awh-text-secondary: light-dark(var(--color-gray-500), var(--color-light-text-2));
+  --awh-text-on-accent: var(--color-black);
+  --awh-border: light-dark(#dddbda, var(--color-dark-600));
+  --awh-border-strong: light-dark(var(--color-gray-300), var(--color-dark-500));
+  --awh-accent: light-dark(var(--color-orange-dark), var(--color-orange-base));
+  --awh-shadow: light-dark(rgba(16, 16, 16, 0.15), rgba(0, 0, 0, 0.5));
+  --awh-status-bad-text: light-dark(#c23934, #ff6b7f);
+
+  --bg-body: var(--awh-bg-primary);
+  --bg-surface: var(--awh-surface);
+  --text-primary: var(--awh-text-primary);
+  --text-secondary: var(--awh-text-secondary);
+  --text-inverse: var(--color-white);
+  --border-subtle: var(--awh-border);
+  --border-base: var(--awh-border-strong);
+  --link-color: var(--awh-accent);
+  --link-hover: var(--color-orange-darker);
+  --input-focus-ring: 0 0 0 3px rgba(255, 125, 40, 0.2);
+  --radius-md: 8px;
+  --shadow-md: 0 5px 10px var(--awh-shadow);
+  --awh-font: "AWH Inter", var(--lwc-fontFamily, "Salesforce Sans"), Arial, sans-serif;
+}
+
+/* --- Card shell --- */
+#awin-helper-panel {
+  position: relative; /* anchors the MID menu */
+  font-family: var(--awh-font);
+  color-scheme: light; /* until bootstrap.js applies data-awh-theme */
+  color: var(--awh-text-primary);
+  background: var(--awh-surface);
+  border-color: var(--awh-border) !important; /* overrides injected.js inline #dddbda */
+}
+
+/* Theme modes (data-awh-theme set by bootstrap.js from awh_theme_mode) */
+#awin-helper-panel[data-awh-theme="system"] { color-scheme: light dark; }
+#awin-helper-panel[data-awh-theme="dark"]   { color-scheme: dark; }
+
+/* --- Header --- */
 #awin-helper-panel .slds-card__header {
   background: linear-gradient(
     270deg,
@@ -16,16 +101,55 @@
   animation: scrollGradient 15s linear infinite;
   color: var(--text-inverse);
   border-radius: var(--lwc-borderRadiusMedium, 0.25rem) var(--lwc-borderRadiusMedium, 0.25rem) 0 0;
-  overflow: hidden;
-  padding: var(--lwc-spacingSmall, 1rem);
+  padding: var(--lwc-spacingSmall, 0.75rem) var(--lwc-spacingMedium, 1rem);
+  margin: 0;
 }
 
-#awin-helper-panel .slds-card__header .slds-text-heading_small {
+#awin-helper-panel .awhHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+#awin-helper-panel .awhHead__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+#awin-helper-panel .awhHead__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+#awin-helper-panel .awhHead__icon img {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+#awin-helper-panel .awhHead__text {
+  font-family: var(--awh-font);
+  font-size: 16px;
+  font-weight: 700;
   color: var(--text-inverse);
-  font-weight: bold;
+  margin: 0;
+  white-space: nowrap;
 }
 
-#awin-helper-panel .slds-card__header .slds-assistive-text {
+#awin-helper-panel .awhHead__mid {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+#awin-helper-panel .slds-assistive-text {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -37,17 +161,134 @@
   border: 0 !important;
 }
 
-#awin-helper-panel .awin-helper-mid-display {
-  margin-top: 0.1rem;
-  line-height: 1.2;
+/* MID toggle (pill on the gradient) */
+#awin-helper-panel [data-awh-mid-toggle] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--awh-font);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-inverse);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 25px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#awin-helper-panel [data-awh-mid-toggle]:hover,
+#awin-helper-panel [data-awh-mid-toggle][aria-expanded="true"] {
+  background: var(--bg-surface);
+  border-color: var(--bg-surface);
+  color: var(--color-orange-dark);
+}
+
+#awin-helper-panel [data-awh-mid-toggle]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+#awin-helper-panel .awhHead__caret {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+#awin-helper-panel [data-awh-mid-toggle][aria-expanded="true"] .awhHead__caret {
+  transform: rotate(180deg);
+}
+
+#awin-helper-panel .awhHead__noMid {
+  font-size: 12px;
+  font-weight: 300;
   font-style: italic;
   color: var(--text-inverse);
 }
-  
-#awin-helper-panel .awin-helper-mid-display:empty {
+
+/* MID quick-links menu */
+#awin-helper-panel [data-awh-mid-menu] {
   display: none;
+  position: absolute;
+  top: calc(100% - 4px);
+  right: var(--lwc-spacingMedium, 1rem);
+  z-index: 50;
+  min-width: 190px;
+  padding: 5px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
 }
 
-#awin-helper-panel .slds-icon-standard-custom {
-  background-color: rgba(255, 255, 255, 0.301);
+#awin-helper-panel .awhHeadWrap {
+  position: relative; /* menu hangs off the bottom of the header */
+}
+
+#awin-helper-panel [data-awh-mid-menu].is-open {
+  display: flex;
+  flex-direction: column;
+}
+
+#awin-helper-panel .awhMenu__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--awh-font);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-primary);
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  padding: 8px 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#awin-helper-panel .awhMenu__item:hover,
+#awin-helper-panel .awhMenu__item:focus-visible {
+  background: var(--color-orange-light);
+  color: var(--text-inverse);
+  text-decoration: none;
+  outline: none;
+}
+
+/* --- TSE__c MID links + IR Start --- */
+a[data-awh-mid-link] {
+  color: var(--color-orange-dark);
+  text-decoration: underline;
+}
+
+a[data-awh-mid-link]:hover {
+  color: var(--link-hover);
+}
+
+button[data-awh-ir-start] {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 2px 8px;
+  font-family: var(--awh-font);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  vertical-align: middle;
+  color: var(--color-orange-dark);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--color-orange-base);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button[data-awh-ir-start]:hover {
+  background: var(--color-orange-base);
+  color: var(--bg-body);
+}
+
+button[data-awh-ir-start]:focus-visible {
+  outline: none;
+  box-shadow: var(--input-focus-ring);
 }

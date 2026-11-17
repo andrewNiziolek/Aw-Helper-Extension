@@ -1,38 +1,71 @@
-/* assets/sfpanel.css */
+/* css/sfpanel.css — shadow-DOM body of the Salesforce Lightning card.
+   Tokens are inherited from #awin-helper-panel (panel-global.css). */
 
-/* Style the wrapper div if you added one, or style elements directly */
-.awin-helper-content {
-    padding: 0.5rem 0; /* Add some vertical padding inside the card body */
-  }
-  
-  ul {
-    list-style-type: disc; /* Or square, or none, etc. */
-    margin: 0;
-    padding-left: 25px; /* Adjust indentation */
-    color: #181818; /* Darker text */
-    font-size: 0.875rem; /* Slightly larger perhaps */
-  }
-  
-  li {
-    margin-bottom: 8px; /* Space between list items */
-  }
-  
-  a {
-    color: #005b96; /* Awin-like blue */
-    text-decoration: none; /* Remove underline by default */
-  }
-  
-  a:hover,
-  a:focus {
-    color: #017fdb;
-    text-decoration: underline;
-  }
-  
-  /* Style for the 'MID not found' message */
-  p.error-message {
-    font-style: italic;
-    color: #c23934; /* Salesforce error color */
-    margin: 0;
-    padding: 5px 0;
-    font-size: 0.875rem;
-  }
+:host {
+  display: block;
+  font-family: var(--awh-font, sans-serif);
+  color: var(--text-primary, #101010);
+}
+
+[data-awh-body] {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0.5rem 0;
+}
+
+[data-awh-section] {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.awhSection__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary, #777573);
+  margin: 0;
+}
+
+[data-awh-actions] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.awhPill {
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--color-orange-dark, #FF6600);
+  background: var(--bg-surface, #ffffff);
+  border: 1.5px solid var(--color-orange-base, #FF7D28);
+  border-radius: 25px;
+  padding: 6px 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.awhPill:hover {
+  background: var(--color-orange-base, #FF7D28);
+  color: var(--bg-body, #f8f4f0);
+  text-decoration: none;
+}
+
+.awhPill:focus-visible {
+  outline: none;
+  box-shadow: var(--input-focus-ring, 0 0 0 3px rgba(255, 125, 40, 0.2));
+}
+
+/* 'MID not found' message */
+[data-awh-error] {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--awh-status-bad-text, #c23934); /* Salesforce error color */
+  margin: 0;
+  padding: 5px 0;
+}

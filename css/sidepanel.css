@@ -71,6 +71,12 @@ body {
   color: var(--text-accent);
 }
 
+.dockHead__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .headVer {
   margin: 0;
   font-size: 12px;
@@ -206,8 +212,8 @@ body {
 
 /* Consent state text (status colors match .chipEasy / .chipDifficult) */
 .dockState { font-weight: 700; }
-.dockState.is-granted { color: #18a45b; }
-.dockState.is-denied  { color: #DE0732; }
+.dockState.is-granted { color: var(--awh-status-ok-text); }
+.dockState.is-denied  { color: var(--awh-status-bad-text); }
 
 .inner-card .dockNote {
   margin-top: 6px;
@@ -236,7 +242,7 @@ body {
   transition: background-color 0.2s;
 }
 
-.inner-card #myShopifyText:hover { background-color: var(--color-orange-light); }
+.inner-card #myShopifyText:hover { background-color: var(--color-orange-light); color: var(--awh-text-on-accent); }
 
 #copyMyShopifyIcon {
   display: inline-flex;
@@ -302,7 +308,7 @@ body {
 }
 
 .append-button:active {
-  color: var(--text-primary);
+  color: var(--awh-text-on-accent);
   background-color: var(--color-orange-light);
 }
 
@@ -351,6 +357,7 @@ body {
 .collapsible:hover,
 .collapsible.active {
   background-color: var(--color-orange-light);
+  color: var(--awh-text-on-accent);
 }
 
 .collapsible:focus-visible {

@@ -14,13 +14,60 @@
   let observer = null;
   let handleTimeout = null;
   let isHandling = false; // Flag to prevent concurrent executions of handleStateChange
+  let lastPublishedMid; // undefined until the first publish so a null is still sent once
+  let themeMode = "system"; // awh_theme_mode, mirrored onto the panel as data-awh-theme
 
-  console.log('[Awin Helper] Bootstrapper v5.1 (Async MID Fetch) initializing...');
+  console.log('[Awin Helper] Bootstrapper v5.2 (Case panel + TSE links) initializing...');
 
   // --- Utilities ---
   function getCaseIdFromPath() {
     const match = window.location.pathname.match(/\/lightning\/r\/Case\/([a-zA-Z0-9]{15,18})\/view/); // More specific ID match
     return match ? match[1] : null;
+  }
+
+  function getTseIdFromPath() {
+    const match = window.location.pathname.match(/\/lightning\/r\/TSE__c\/([a-zA-Z0-9]{15,18})\/view/);
+    return match ? match[1] : null;
+  }
+
+  // Share the page MID with background.js so Dock can auto fill its tools
+  function publishMid(mid) {
+    const value = mid || null;
+    if (value === lastPublishedMid) return;
+    lastPublishedMid = value;
+    try {
+      chrome.runtime.sendMessage({ type: "AWH_SF_MID", mid: value }, () => {
+        void chrome.runtime.lastError; // background asleep; next change republishes
+      });
+    } catch {
+      // extension context invalidated (extension reloaded)
+    }
+  }
+
+  // --- Theme (System / Light / Dark), set from Glance / Dock ---
+  const THEME_KEY   = "awh_theme_mode";
+  const THEME_MODES = ["system", "light", "dark"];
+
+  function applyPanelTheme() {
+    const panelEl = document.getElementById("awin-helper-panel");
+    if (panelEl) panelEl.setAttribute("data-awh-theme", themeMode);
+  }
+
+  function setThemeMode(mode) {
+    themeMode = THEME_MODES.includes(mode) ? mode : "system";
+    applyPanelTheme();
+  }
+
+  async function initPanelTheme() {
+    try {
+      const { [THEME_KEY]: stored } = await chrome.storage.local.get(THEME_KEY);
+      setThemeMode(stored);
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === "local" && changes[THEME_KEY]) setThemeMode(changes[THEME_KEY].newValue);
+      });
+    } catch {
+      // extension context invalidated; panel keeps its light default
+    }
   }
 
   async function loadInjectionModule() {
@@ -29,8 +76,8 @@
         // Use dynamic import to load the module
         injectionModule = await import(chrome.runtime.getURL('scripts/injected.js'));
         // Check if necessary functions exist
-        if (!injectionModule.findMidOnPage || !injectionModule.injectCasePanelOnce || !injectionModule.removeCasePanel) {
-             console.error('[Awin Helper] Critical Error: Required functions (findMidOnPage, injectCasePanelOnce, removeCasePanel) not found in injected.js module.');
+        if (!injectionModule.findMidOnPage || !injectionModule.injectCasePanelOnce || !injectionModule.removeCasePanel || !injectionModule.decorateTseMids) {
+             console.error('[Awin Helper] Critical Error: Required functions (findMidOnPage, injectCasePanelOnce, removeCasePanel, decorateTseMids) not found in injected.js module.');
              injectionModule = null; // Invalidate module
              return null;
         }
@@ -84,10 +131,13 @@
              return; // Avoid injecting if the context changed *during* the async MID search
           }
 
+          publishMid(mid);
+
           console.log(`[Awin Helper] Attempting injection for case: ${caseIdOnPage} with MID: ${mid}`);
           const success = mod.injectCasePanelOnce(mid); // Pass the found MID (or null)
 
           if (success) {
+            applyPanelTheme(); // same task as the insert, so the panel never paints unthemed
             console.log(`[Awin Helper] Injection successful for case: ${caseIdOnPage}`);
             currentInjectedCaseId = caseIdOnPage; // Update state *only on successful injection*
           } else {
@@ -104,9 +154,11 @@
           console.log(`[Awin Helper] State change: Navigated away from case ${currentInjectedCaseId}. Removing panel.`);
           await mod.removeCasePanel();
           currentInjectedCaseId = null; // Update state
-        } else {
-          // console.log('[Awin Helper] State check: Not on a case page, no panel injected.');
         }
+
+        //Scenario 3: TSE__c (Implementation) record: MID links + IR Start (idempotent, debounced by the observer)
+        if (getTseIdFromPath()) publishMid(mod.decorateTseMids());
+        else publishMid(null);
       }
     } catch (error) {
        console.error('[Awin Helper] Error during handleStateChange:', error);
@@ -149,6 +201,7 @@
   }
 
   // Initialization
+  initPanelTheme();
   // Delay observer setup slightly to allow initial page elements to settle
   setTimeout(startObserver, OBSERVER_START_DELAY_MS);
 

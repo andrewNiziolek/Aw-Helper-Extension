@@ -10,6 +10,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		<script src="scripts/theme.js"></script>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -25,6 +26,11 @@
 			<div class="headerDiv">
 				<h3 class="headText">Awin Helper</h3>
 				<div class="headActions">
+				<div class="themeSwitch" role="radiogroup" aria-label="Theme">
+					<button type="button" class="themeSwitch__btn" role="radio" data-theme-value="system">System</button>
+					<button type="button" class="themeSwitch__btn" role="radio" data-theme-value="light">Light</button>
+					<button type="button" class="themeSwitch__btn" role="radio" data-theme-value="dark">Dark</button>
+				</div>
 				<div class="headAttrib" id="attribText">
 					<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="50%" height="50%" viewBox="0,0,256,256">
 						<g fill="#fdfdfd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(16,16)"><path d="M8,0c-4.4,0 -8,3.6 -8,8c0,3.526 2.315,6.534 5.498,7.591c0.377,0.055 0.52,-0.179 0.52,-0.385c0,-0.19 -0.007,-0.693 -0.011,-1.361c-2.225,0.483 -2.695,-1.072 -2.695,-1.072c-0.364,-0.924 -0.888,-1.17 -0.888,-1.17c-0.726,-0.496 0.055,-0.486 0.055,-0.486c0.803,0.057 1.225,0.824 1.225,0.824c0.714,1.223 1.872,0.87 2.328,0.665c0.073,-0.517 0.279,-0.87 0.508,-1.069c-1.776,-0.202 -3.644,-0.888 -3.644,-3.954c0,-0.873 0.312,-1.587 0.823,-2.147c-0.082,-0.203 -0.357,-1.017 0.079,-2.118c0,0 0.672,-0.215 2.2,0.82c0.638,-0.177 1.322,-0.266 2.002,-0.269c0.679,0.003 1.364,0.092 2.003,0.269c1.527,-1.035 2.198,-0.82 2.198,-0.82c0.436,1.101 0.162,1.915 0.08,2.117c0.513,0.559 0.822,1.273 0.822,2.147c0,3.073 -1.87,3.75 -3.653,3.948c0.287,0.247 0.543,0.735 0.543,1.482c0,1.07 -0.01,1.932 -0.01,2.195c0,0.208 0.141,0.443 0.521,0.385c3.182,-1.06 5.496,-4.066 5.496,-7.592c0,-4.4 -3.6,-8 -8,-8z"></path></g></g>
@@ -93,7 +99,7 @@
 				<!-- This content will be replaced by announce.js -->
 					<div class="announceIcon">
 						<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="90%" height="90%" viewBox="0 0 22 20">
-							<path fill="#5e5e5e" fill-rule="evenodd" d="M6 8a6 6 0 1112 0v2.917c0 .703.228 1.387.65 1.95L20.7 15.6a1.5 1.5 0 01-1.2 2.4h-15a1.5
+							<path fill="currentColor" fill-rule="evenodd" d="M6 8a6 6 0 1112 0v2.917c0 .703.228 1.387.65 1.95L20.7 15.6a1.5 1.5 0 01-1.2 2.4h-15a1.5
 							1.5 0 01-1.2-2.4l2.05-2.733a3.25 3.25 0 00.65-1.95V8zm6 13.5A3.502 3.502 0 018.645 19h6.71A3.502 3.502 0 0112 21.5z"/></svg>
 						</svg>
 					</div>
