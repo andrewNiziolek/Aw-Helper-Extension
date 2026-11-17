@@ -1,3 +1,6 @@
+// Copyright (c) 2023-2026 Andrew Niziolek
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Capturing text boxes
 const MIDBox = document.getElementById("clipMID");
 const CRBox = document.getElementById("clipCR");
@@ -16,7 +19,7 @@ function recallAndSet(box, key) {
 
   box.addEventListener("input", function () {
     clearBtn.textContent = "Saving...";
-    chrome.storage.local.set({[key]: box.value}, function() {
+    chrome.storage.local.set({ [key]: box.value }, function() {
       setTimeout(function() {
         clearBtn.textContent = "Clear";
       }, 500); // 1/2 second delay for better visibility
@@ -24,19 +27,25 @@ function recallAndSet(box, key) {
   });
 }
 
-// Calling rAS function with desired values
-recallAndSet(MIDBox, "MIDSave");
-recallAndSet(CRBox, "CRSave");
-recallAndSet(NFBox, "NFSave");
+function initClipSaver() {
+  if (!MIDBox || !CRBox || !NFBox || !clearBtn) return;
 
-clearBtn.addEventListener("click", function () {
-  MIDBox.value = "";
-  CRBox.value = "";
-  NFBox.value = "";
+  // Calling rAS function with desired values
+  recallAndSet(MIDBox, "awh_MIDSave");
+  recallAndSet(CRBox, "awh_CRSave");
+  recallAndSet(NFBox, "awh_NFSave");
 
-  chrome.storage.local.set({
-    MIDSave: "",
-    CRSave: "",
-    NFSave: ""
+  clearBtn.addEventListener("click", function () {
+    MIDBox.value = "";
+    CRBox.value = "";
+    NFBox.value = "";
+
+    chrome.storage.local.set({
+      awh_MIDSave: "",
+      awh_CRSave: "",
+      awh_NFSave: ""
+    });
   });
-});
+}
+
+initClipSaver();

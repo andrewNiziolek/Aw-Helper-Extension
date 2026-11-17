@@ -1,16 +1,54 @@
+// Copyright (c) 2023-2026 Andrew Niziolek
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // New update page popup.
 let disableUpdatePopup = "1";
 chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === 'update' && disableUpdatePopup === "0") {
-    chrome.tabs.create({ url: 'https://aniziolek.notion.site/Awin-Helper-Updates-1ec7c46530f34c3691e307f498284fd4?pvs=74', active: true }, (tab) => {
+  if (details.reason === "update" && disableUpdatePopup === "0") {
+    chrome.tabs.create({ url: "https://aniziolek.notion.site/Awin-Helper-Updates-1ec7c46530f34c3691e307f498284fd4?pvs=74", active: true }, (tab) => {
       chrome.tabs.group({ tabIds: [tab.id] }, (groupId) => {
         chrome.tabGroups.update(groupId, {
-          title: 'AWH Update',
-          color: 'orange'
+          title: "AWH Update",
+          color: "orange"
         });
       });
     });
   }
+});
+
+// --- One-time storage key migration (pre-awh_ keys -> awh_ prefix) ---
+const LEGACY_KEY_MAP = {
+  modeSwitch: "awh_modeSwitch",
+  dismissedAnnIds: "awh_dismissedAnnIds",
+  MIDSave: "awh_MIDSave",
+  CRSave: "awh_CRSave",
+  NFSave: "awh_NFSave"
+};
+
+async function migrateStorageKeys() {
+  try {
+    const oldKeys = Object.keys(LEGACY_KEY_MAP);
+    const newKeys = Object.values(LEGACY_KEY_MAP);
+    const stored = await chrome.storage.local.get([...oldKeys, ...newKeys]);
+
+    const toSet = {};
+    const toRemove = [];
+    for (const oldKey of oldKeys) {
+      if (stored[oldKey] === undefined) continue;
+      const newKey = LEGACY_KEY_MAP[oldKey];
+      if (stored[newKey] === undefined) toSet[newKey] = stored[oldKey];
+      toRemove.push(oldKey);
+    }
+
+    if (Object.keys(toSet).length) await chrome.storage.local.set(toSet);
+    if (toRemove.length) await chrome.storage.local.remove(toRemove);
+  } catch {
+    // migration is best-effort; old values are simply left in place
+  }
+}
+
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "update") migrateStorageKeys();
 });
 
 //Theme Controller
@@ -30,7 +68,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // --- Replace MIDs with clickable UI links ---
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
+  if (changeInfo.status === "complete" && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
     chrome.scripting.executeScript({
       target: { tabId: tabId },
       func: transformNumbersToLinks
@@ -40,18 +78,18 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 function transformNumbersToLinks() {
   const replaceNumbers = (rootElement = document) => {
-    rootElement.querySelectorAll('lightning-formatted-text').forEach(element => {
+    rootElement.querySelectorAll("lightning-formatted-text").forEach(element => {
       // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
       const textContent = element.textContent.trim();
       if (/^\d+$/.test(textContent)) {  // Check if the content is purely numbers
-        const numberLink = document.createElement('a');
+        const numberLink = document.createElement("a");
         numberLink.href = `https://ui.awin.com/dashboard/awin/advertiser/${textContent}`;
         numberLink.textContent = textContent;
-        numberLink.style.color = '#fc8e45';
-        numberLink.style.textDecoration = 'underline';
-        numberLink.target = '_blank'; // Open in a new tab
+        numberLink.style.color = "#fc8e45";
+        numberLink.style.textDecoration = "underline";
+        numberLink.target = "_blank"; // Open in a new tab
         
-        numberLink.title = 'Jump to the UI.'; // Tooltip text
+        numberLink.title = "Jump to the UI."; // Tooltip text
 
         element.replaceWith(numberLink);
       }
@@ -85,17 +123,17 @@ function createTabGroup(urls, mid, toolName) {
 
     urls.forEach((url) => {
     chrome.tabs.create({ url, active: false }, (tab) => {
-      if (!tab || typeof tab.id !== 'number') return;
+      if (!tab || typeof tab.id !== "number") return;
       tabIds.push(tab.id);
 
       // When all tabs are open, group and label them.
       if (tabIds.length === urls.length) {
         chrome.tabs.group({ tabIds }, (groupId) => {
-          if (typeof groupId !== 'number') return;
+          if (typeof groupId !== "number") return;
           if (toolName == "irTool") {
-            chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: 'orange' });
+            chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: "orange" });
           }
-          chrome.tabGroups.update(groupId, { title: mid, color: 'orange' });
+          chrome.tabGroups.update(groupId, { title: mid, color: "orange" });
         });
       }
     });
@@ -104,7 +142,7 @@ function createTabGroup(urls, mid, toolName) {
 
 // New Implementation Tool
 chrome.runtime.onMessage.addListener((request) => {
-  if (request?.action !== 'createNITabs') return;
+  if (request?.action !== "createNITabs") return;
 
   const MIDValue = String(request.mid);
   const URLs = [
@@ -125,7 +163,7 @@ chrome.runtime.onMessage.addListener((request) => {
 
 // Internal Review Tool
 chrome.runtime.onMessage.addListener((request) => {
-  if (request?.action !== 'createIRTabs') return;
+  if (request?.action !== "createIRTabs") return;
 
   const MIDValue = String(request.mid); // already sanitized in popup
   const URLs = [
@@ -150,23 +188,23 @@ const mem = new Map();
 
 async function setDetections(tabId, items) {
   mem.set(tabId, items);
-  await chrome.storage.session.set({ ['det_'+tabId]: { items, ts: Date.now() } });
+  await chrome.storage.session.set({ ["awh_det_" + tabId]: { items, ts: Date.now() } });
 }
 
 async function getDetections(tabId) {
   if (mem.has(tabId)) return mem.get(tabId);
-  const obj = await chrome.storage.session.get('det_'+tabId);
-  return obj?.['det_'+tabId]?.items || [];
+  const obj = await chrome.storage.session.get("awh_det_" + tabId);
+  return obj?.["awh_det_" + tabId]?.items || [];
 }
 
 function setBadge(tabId, count) {
-  chrome.action.setBadgeText({ tabId, text: count ? String(count) : '' });
-  chrome.action.setBadgeBackgroundColor({ color: '#FF9550' });
+  chrome.action.setBadgeText({ tabId, text: count ? String(count) : "" });
+  chrome.action.setBadgeBackgroundColor({ color: "#FF9550" });
 }
 
 // Content script reports
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg?.type === 'TECH_DETECTIONS') {
+  if (msg?.type === "TECH_DETECTIONS") {
     const tabId = sender?.tab?.id;
     if (Number.isInteger(tabId)) {
       setDetections(tabId, msg.items || []).then(() => setBadge(tabId, msg.items?.length || 0));
@@ -174,13 +212,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     return true;
   }
-  if (msg?.type === 'GET_TECH_DETECTIONS') {
+  if (msg?.type === "GET_TECH_DETECTIONS") {
     const tabId = msg.tabId;
     (async () => {
       const items = await getDetections(tabId);
       if (!items.length) {
         // ask the content script in that tab to re-run immediately
-        try { chrome.tabs.sendMessage(tabId, { type: 'REDETECT_NOW' }); } catch {}
+        try { chrome.tabs.sendMessage(tabId, { type: "REDETECT_NOW" }); } catch {}
       }
       sendResponse({ items });
     })();
@@ -204,14 +242,14 @@ chrome.windows.onFocusChanged.addListener(async () => {
 // Clear state when tabs truly go away or reload
 chrome.tabs.onRemoved.addListener((tabId) => {
   mem.delete(tabId);
-  chrome.storage.session.remove('det_'+tabId);
+  chrome.storage.session.remove("awh_det_" + tabId);
 });
 chrome.tabs.onUpdated.addListener((tabId, info) => {
   if (info.discarded === true) { // tab got discarded
     // keep storage; badge can reflect last known
     return;
   }
-  if (info.status === 'loading') {
+  if (info.status === "loading") {
     mem.delete(tabId);
     setBadge(tabId, 0);
     // content script will re-emit on DOMContentLoaded; if it doesn’t, popup will ping via GET handler

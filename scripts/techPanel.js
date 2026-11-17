@@ -1,3 +1,6 @@
+// Copyright (c) 2023-2026 Andrew Niziolek
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // scripts/techPanel.js
 
 // Map your background script item IDs to your TECH_CONFIG keys
@@ -12,6 +15,13 @@ const ID_TO_CONFIG = {
   'cmp': 'consent',
   'magento': 'magento'
 };
+
+// Escape page-derived strings before they go into innerHTML
+function escapeHTML(str) {
+  return String(str ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
 
 async function updateSidePanel() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -86,6 +96,7 @@ async function updateSidePanel() {
     if (!configKey || !TECH_CONFIG[configKey]) return;
 
     const tech = TECH_CONFIG[configKey];
+    let displayName = tech.name;
     let chipText = tech.chipText;
     let tooltipAttr = "";
     let tooltipClass = "";
@@ -95,36 +106,40 @@ async function updateSidePanel() {
       const all = it.meta?.all || [];
       chipText = all.length > 1 ? `${it.label} +${all.length - 1}` : it.label;
       if (all.length > 1) {
-        tooltipAttr = `data-tooltip="${all.slice(1).join(", ")}"`;
+        tooltipAttr = `data-tooltip="${escapeHTML(all.slice(1).join(", "))}"`;
         tooltipClass = "tooltip";
       }
-    } 
+    }
     // 2. Custom Logic: CMP Tooltip
     else if (it.id === "cmp" && it.meta?.tooltip) {
-      tooltipAttr = `data-tooltip="${it.meta.tooltip}"`;
+      tooltipAttr = `data-tooltip="${escapeHTML(it.meta.tooltip)}"`;
       tooltipClass = "tooltip";
-    } 
-    // 3. Custom Logic: Shopify Domain extraction
+    }
+    // 3. Custom Logic: GTM container ID as the name in Tech mode
+    else if (it.id === "gtm" && techMode && it.label && it.label !== "GTM Found") {
+      displayName = it.label;
+    }
+    // 4. Custom Logic: Shopify Domain extraction
     else if (it.id === "shopify") {
       shopifyDomain = it.meta?.shopifyDomain || '';
     }
 
     // Inject the main Tech row
     container.innerHTML += `
-      <div class="techDisplay" id="${configKey}Display" style="display: flex;">
+      <div class="techDisplay" id="${configKey}Display" style="display: grid;">
           <div class="techIcon">${tech.svg}</div>
           <div class="techData">
-              <p class="techReadout" id="${configKey}Text">${tech.name}</p>
+              <p class="techReadout" id="${configKey}Text">${escapeHTML(displayName)}</p>
           </div>
-          <span class="chip ${tech.chipClass} ${tooltipClass}" id="${configKey}Chip" ${tooltipAttr}>${chipText}</span>
+          <span class="chip ${tech.chipClass} ${tooltipClass}" id="${configKey}Chip" ${tooltipAttr}>${escapeHTML(chipText)}</span>
       </div>
     `;
 
     // Inject Shopify Additional Info (Only if Tech Mode is ON)
     if (it.id === "shopify" && techMode && shopifyDomain) {
       container.innerHTML += `
-        <div class="techAdditionalInfo" id="myShopifyInfo" style="display: flex;">
-            <p class="techAdditionalText" id="myShopifyText">${shopifyDomain}</p>
+        <div class="techAdditionalInfo" id="myShopifyInfo" style="display: grid;">
+            <p class="techAdditionalText" id="myShopifyText">${escapeHTML(shopifyDomain)}</p>
         </div>
       `;
     }
@@ -193,7 +208,7 @@ function shInitShopifyCopy() {
 // metadata
 window.__awin_helper_meta = {
   by: "Andrew Niziolek",
-  license: "AGPL-3.0",
+  license: "AGPL-3.0-or-later",
   fingerprint: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 };
 

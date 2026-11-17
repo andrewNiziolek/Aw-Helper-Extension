@@ -1,3 +1,6 @@
+// Copyright (c) 2023-2026 Andrew Niziolek
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // sidepanel.js
 async function updateSidePanel() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });

@@ -1,3 +1,6 @@
+// Copyright (c) 2023-2026 Andrew Niziolek
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // techConfig.js (or at the top of your scripts)
 const TECH_CONFIG = {
   awc: {
@@ -74,7 +77,7 @@ function renderDetections(detectedKeys) {
     if (!tech) return;
 
     container.innerHTML += `
-      <div class="techDisplay" id="${key}Display" style="display: flex;">
+      <div class="techDisplay" id="${key}Display" style="display: grid;">
           <div class="techIcon">${tech.svg}</div>
           <div class="techData">
               <p class="techReadout" id="${key}Text">${tech.name}</p>

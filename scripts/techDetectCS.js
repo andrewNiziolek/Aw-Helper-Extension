@@ -1,27 +1,30 @@
+// Copyright (c) 2023-2026 Andrew Niziolek
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 (() => {
   console.log("🛠️ [Awin Helper] Tech Detection Script Injected");
 
   //REGISTRIES & CONFIG
   const CMP_REGISTRY = [
-    { id: 'onetrust', name: 'OneTrust', priority: 10, scripts: [/(^|:\/\/)cdn\.cookielaw\.org\/.*\/otSDKStub\.js(?:\?.*)?$/i, /(^|:\/\/)optanon\.blob\.core\.windows\.net\//i, /(^|:\/\/).*\.onetrust\.com\//i], globals: ['OneTrust', 'OptanonActiveGroups', 'Optanon'] },
-    { id: 'cookiebot', name: 'Cookiebot', priority: 20, scripts: [/(^|\/\/)consent\.cookiebot\.com\/uc\.js/i, /(^|\/\/).*\.cookiebot\.com\//i], globals: ['Cookiebot'] },
-    { id: 'iubenda', name: 'Iubenda', priority: 30, scripts: [/(^|\/\/)cdn\.iubenda\.com\//i, /(^|\/\/).*\.iubenda\.com\/cookie-policy\//i], globals: ['_iub', 'iubenda'] },
-    { id: 'osano', name: 'Osano', priority: 40, scripts: [/(^|\/\/)cmp\.osano\.com\//i, /(^|\/\/).*\.osano\.com\//i], globals: ['Osano', '__osano'] },
-    { id: 'sourcepoint', name: 'SourcePoint', priority: 50, scripts: [/(^|\/\/)cdn\.privacy-mgmt\.com\//i, /(^|\/\/)notice\.sp-prod\.net\//i], globals: ['_sp_', 'sp'] },
-    { id: 'gcm', name: 'Google Consent Mode', priority: 60, 
+    { id: "onetrust", name: "OneTrust", priority: 10, scripts: [/(^|:\/\/)cdn\.cookielaw\.org\/.*\/otSDKStub\.js(?:\?.*)?$/i, /(^|:\/\/)optanon\.blob\.core\.windows\.net\//i, /(^|:\/\/).*\.onetrust\.com\//i], globals: ["OneTrust", "OptanonActiveGroups", "Optanon"] },
+    { id: "cookiebot", name: "Cookiebot", priority: 20, scripts: [/(^|\/\/)consent\.cookiebot\.com\/uc\.js/i, /(^|\/\/).*\.cookiebot\.com\//i], globals: ["Cookiebot"] },
+    { id: "iubenda", name: "Iubenda", priority: 30, scripts: [/(^|\/\/)cdn\.iubenda\.com\//i, /(^|\/\/).*\.iubenda\.com\/cookie-policy\//i], globals: ["_iub", "iubenda"] },
+    { id: "osano", name: "Osano", priority: 40, scripts: [/(^|\/\/)cmp\.osano\.com\//i, /(^|\/\/).*\.osano\.com\//i], globals: ["Osano", "__osano"] },
+    { id: "sourcepoint", name: "SourcePoint", priority: 50, scripts: [/(^|\/\/)cdn\.privacy-mgmt\.com\//i, /(^|\/\/)notice\.sp-prod\.net\//i], globals: ["_sp_", "sp"] },
+    { id: "gcm", name: "Google Consent Mode", priority: 60, 
       scriptsMatchFn: (u) => {
         try {
           const url = new URL(u, location.href);
-          return url.searchParams?.has('gcs') && (/(^|\/)gtm\.js$/.test(url.pathname) || /(^|\/)(collect|g\/collect)$/.test(url.pathname));
+          return url.searchParams?.has("gcs") && (/(^|\/)gtm\.js$/.test(url.pathname) || /(^|\/)(collect|g\/collect)$/.test(url.pathname));
         } catch { return false; }
       },
       globalsMatchFn: () => {
-        try { return typeof self.gtag === 'function' && (self.gtag.toString().includes("consent") || !!self.google_tag_data?.consent); } catch { return false; }
+        try { return typeof self.gtag === "function" && (self.gtag.toString().includes("consent") || !!self.google_tag_data?.consent); } catch { return false; }
       }
     },
-    { id: 'shopify_native', name: 'Shopify Native', priority: 100, 
+    { id: "shopify_native", name: "Shopify Native", priority: 100, 
       globalsMatchFn: () => {
-        try { return typeof self.Shopify?.customerPrivacy === 'object' && typeof self.Shopify.customerPrivacy.setTrackingConsent === 'function'; } catch { return false; }
+        try { return typeof self.Shopify?.customerPrivacy === "object" && typeof self.Shopify.customerPrivacy.setTrackingConsent === "function"; } catch { return false; }
       }
     }
   ];
@@ -32,7 +35,7 @@
   };
 
   const hasAnyGlobal = (names) => {
-    try { return names?.some(n => typeof self[n] !== 'undefined'); } catch { return false; }
+    try { return names?.some(n => typeof self[n] !== "undefined"); } catch { return false; }
   };
 
   const waitForShopify = async (timeout = 50) => {
@@ -97,8 +100,8 @@
     }
 
     try {
-      for (const e of performance.getEntriesByType('resource')) {
-        if (typeof e?.name === 'string') data.scriptUrls.push(e.name);
+      for (const e of performance.getEntriesByType("resource")) {
+        if (typeof e?.name === "string") data.scriptUrls.push(e.name);
       }
     } catch {}
 
@@ -124,7 +127,7 @@
     found.sort((a, b) => a.priority - b.priority);
     const uniq = Array.from(new Map(found.map(f => [f.id, f])).values());
 
-    return { providers: uniq.map(x => x.name), tooltip: uniq.map(x => x.name).join(', ') };
+    return { providers: uniq.map(x => x.name), tooltip: uniq.map(x => x.name).join(", ") };
   }
 
   // MAIN EXECUTION
@@ -152,7 +155,7 @@
     if (env.dwinUrls.length) items.push({ id: "dwin1", label: env.dwinUrls[0], meta: { all: env.dwinUrls } });
 
     const cmp = detectCMPProviders(env.scriptUrls);
-    if (cmp) items.push({ id: 'cmp', label: 'Cookie Consent', meta: { providers: cmp.providers, tooltip: cmp.tooltip } });
+    if (cmp) items.push({ id: "cmp", label: "Cookie Consent", meta: { providers: cmp.providers, tooltip: cmp.tooltip } });
 
     console.log("Final Items Payload:", items);
     console.groupEnd();
@@ -175,8 +178,8 @@
     run();
   }
 
-  chrome.runtime.onMessage.addListener((msg) => { if (msg?.type === 'REDETECT_NOW') run(); });
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') run(); });
+  chrome.runtime.onMessage.addListener((msg) => { if (msg?.type === "REDETECT_NOW") run(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") run(); });
   
   try {
     let lastUrl = location.href;
@@ -189,8 +192,14 @@
 
   let debounceTimer = null;
   let isThrottled = false;
-  new MutationObserver(() => {
-    if (isThrottled) return;
+  // Only re-run when new <script> tags appear; detection doesn't depend on other DOM changes
+  const addsScript = (mutations) => mutations.some(m => {
+    for (const n of m.addedNodes) if (n.nodeName === "SCRIPT") return true;
+    return false;
+  });
+
+  new MutationObserver((mutations) => {
+    if (isThrottled || !addsScript(mutations)) return;
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       isThrottled = true; run(); setTimeout(() => { isThrottled = false; }, 1500); 

@@ -410,6 +410,13 @@ input:checked + .slider:after {
   box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
 }
 
+/* Right-anchor tooltips on row chips so they don't clip at the popup edge */
+.techDisplay .tooltip::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
 .techIcon {
   margin-top: 5px;
   margin-left: 5px;

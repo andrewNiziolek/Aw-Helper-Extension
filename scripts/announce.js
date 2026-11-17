@@ -1,3 +1,6 @@
+// Copyright (c) 2023-2026 Andrew Niziolek
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 console.log("announce.js loaded");
 
 const ANN_ENDPOINT = "https://www.andrewniziolek.com/aw-announce.json";
@@ -13,7 +16,7 @@ async function initAnnouncement(testItems = null) {
   const more  = document.getElementById("announceMore");
   if (!mount || !more) return;
 
-  const { dismissedAnnIds = [] } = await chrome.storage.local.get("dismissedAnnIds");
+  const { awh_dismissedAnnIds: dismissedAnnIds = [] } = await chrome.storage.local.get("awh_dismissedAnnIds");
 
   let items = [];
   
@@ -127,9 +130,9 @@ async function initAnnouncement(testItems = null) {
   // Dismiss handling
   more.querySelector(".annDismiss")?.addEventListener("click", async (e) => {
     e.stopPropagation();
-    const { dismissedAnnIds = [] } = await chrome.storage.local.get("dismissedAnnIds");
+    const { awh_dismissedAnnIds: dismissedAnnIds = [] } = await chrome.storage.local.get("awh_dismissedAnnIds");
     const next = Array.from(new Set([...(dismissedAnnIds||[]), it.id]));
-    await chrome.storage.local.set({ dismissedAnnIds: next });
+    await chrome.storage.local.set({ awh_dismissedAnnIds: next });
 
     more.classList.remove("is-open");
     mount.classList.remove("is-visible", "is-info", "is-warning", "is-critical");
