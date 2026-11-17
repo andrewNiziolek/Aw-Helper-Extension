@@ -8,40 +8,57 @@
   color: var(--color-off-white);
   grid-area: header;
   display: grid;
-  grid-template-columns: 1fr .15fr .15fr .15fr;
-  grid-template-areas: "head-b head-b1 head-c head-d";
-  background: var(--color-orange-base);
-  justify-content: center;
+  grid-template-columns: 1fr 1fr; /* mirrors .extBody columns */
+  gap: 0 10px;
+  align-items: center;
+  background: linear-gradient(90deg, #de0732 0%, #ff6600 20%, #de0732 100%); /* static brand gradient */
   height: 2.5rem;
-  padding: 0 1.5rem;
+  padding: 0 10px; /* matches .glanceCard text inset */
   margin-bottom: 5px;
   border-radius: 5px;
 }
 
-.headAttrib2 {
-  grid-area: head-b1;
-  padding-top: 8px;
-  align-items: center;
-  cursor: pointer;
-}
-
-.headAttrib {
-  grid-area: head-c;
-  padding-top: 8px;
-  align-items: center;
-  cursor: pointer;
-}
-
 .headText {
-  grid-area: head-b;
-  position: relative;
-  bottom: 5px;
+  margin: 0;
+  text-align: left;
   font-size: 16px;
   font-weight: 700;
 }
 
+.headActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+
+.headAttrib,
+.headAttrib2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  padding: 4px; /* larger click target around the icon */
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color .2s;
+}
+
+.headAttrib:hover,
+.headAttrib2:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.headAttrib svg,
+.headAttrib2 svg {
+  width: 100%;
+  height: 100%;
+}
+
 .headVer {
-  grid-area: head-d;
+  margin: 0 0 0 4px;
   font-size: 12px;
   font-weight: 300;
 }
