@@ -1,21 +1,57 @@
-// Variable to control whether the update popup should open. "1" to disable.
-let disableUpdatePopup = "0";
+// Copyright (c) 2023-2026 Andrew Niziolek
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
+// New update page popup.
+let disableUpdatePopup = "0";
 chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === 'update' && disableUpdatePopup === "0") {
-    // Open a new tab in a new group when the extension is updated
-    chrome.tabs.create({ url: 'https://aniziolek.notion.site/Awin-Helper-Updates-1ec7c46530f34c3691e307f498284fd4?pvs=74', active: true }, (tab) => {
+  if (details.reason === "update" && disableUpdatePopup === "0") {
+    chrome.tabs.create({ url: "https://aniziolek.notion.site/Awin-Helper-Updates-1ec7c46530f34c3691e307f498284fd4?pvs=74", active: true }, (tab) => {
       chrome.tabs.group({ tabIds: [tab.id] }, (groupId) => {
         chrome.tabGroups.update(groupId, {
-          title: 'AWH Update',
-          color: 'orange'
+          title: "AWH Update",
+          color: "orange"
         });
       });
     });
   }
 });
 
-// Send the version from manifest.json to the popup script
+// --- One-time storage key migration (pre-awh_ keys -> awh_ prefix) ---
+const LEGACY_KEY_MAP = {
+  modeSwitch: "awh_modeSwitch",
+  dismissedAnnIds: "awh_dismissedAnnIds",
+  MIDSave: "awh_MIDSave",
+  CRSave: "awh_CRSave",
+  NFSave: "awh_NFSave"
+};
+
+async function migrateStorageKeys() {
+  try {
+    const oldKeys = Object.keys(LEGACY_KEY_MAP);
+    const newKeys = Object.values(LEGACY_KEY_MAP);
+    const stored = await chrome.storage.local.get([...oldKeys, ...newKeys]);
+
+    const toSet = {};
+    const toRemove = [];
+    for (const oldKey of oldKeys) {
+      if (stored[oldKey] === undefined) continue;
+      const newKey = LEGACY_KEY_MAP[oldKey];
+      if (stored[newKey] === undefined) toSet[newKey] = stored[oldKey];
+      toRemove.push(oldKey);
+    }
+
+    if (Object.keys(toSet).length) await chrome.storage.local.set(toSet);
+    if (toRemove.length) await chrome.storage.local.remove(toRemove);
+  } catch {
+    // migration is best-effort; old values are simply left in place
+  }
+}
+
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "update") migrateStorageKeys();
+});
+
+// Link Version Display in popup to manifest version number.
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.getVersion) {
     const manifestData = chrome.runtime.getManifest();
@@ -23,86 +59,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Replace MIDs with clickable links on specific SF pages
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url.includes("https://awin.lightning.force.com/lightning/r/TSE__c")) {
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      func: transformNumbersToLinks
-    });
-  }
-});
+// TSE__c MID links + IR Start now live in scripts/bootstrap.js / scripts/injected.js
+// fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 
-// Function to replace numbers with clickable links
-function transformNumbersToLinks() {
-  const replaceNumbers = (rootElement = document) => {
-    rootElement.querySelectorAll('lightning-formatted-text').forEach(element => {
-      // fp: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-      const textContent = element.textContent.trim();
-      if (/^\d+$/.test(textContent)) {  // Check if the content is purely numbers
-        const numberLink = document.createElement('a');
-        numberLink.href = `https://ui.awin.com/dashboard/awin/advertiser/${textContent}`;
-        numberLink.textContent = textContent;
-        numberLink.style.color = '#fc8e45';
-        numberLink.style.textDecoration = 'underline';
-        numberLink.target = '_blank'; // Open in a new tab
-        
-        numberLink.title = 'Jump to the UI.'; // Tooltip text
-
-        element.replaceWith(numberLink);
-      }
-    });
-  };
-
-  // Run once when the script is first injected
-  replaceNumbers();
-
-  // Set up a MutationObserver to monitor for changes in the DOM
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          replaceNumbers(node); // Re-run the replacement function only for added nodes
-        }
-      });
-    });
-  });
-
-  // Start observing the document for changes
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-}
-
-
-
-// Start of New Implementation Tool
-// Create tabs and group them; use the MID passed in from the popup for the group title.
-function createImplTabs(urls, tabMID) {
+// Grouped Tab Creator
+function createTabGroup(urls, mid, toolName) {
   const tabIds = [];
 
-  urls.forEach((url) => {
+    urls.forEach((url) => {
     chrome.tabs.create({ url, active: false }, (tab) => {
-      if (!tab || typeof tab.id !== 'number') return;
+      if (!tab || typeof tab.id !== "number") return;
       tabIds.push(tab.id);
 
       // When all tabs are open, group and label them.
       if (tabIds.length === urls.length) {
         chrome.tabs.group({ tabIds }, (groupId) => {
-          if (typeof groupId !== 'number') return;
-          chrome.tabGroups.update(groupId, { title: tabMID, color: 'orange' });
+          if (typeof groupId !== "number") return;
+          if (toolName == "irTool") {
+            chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: "orange" });
+          }
+          chrome.tabGroups.update(groupId, { title: mid, color: "orange" });
         });
       }
     });
   });
 }
 
-// Listen for sanitized MID from the popup and invoke the tab creation.
+// New Implementation Tool
 chrome.runtime.onMessage.addListener((request) => {
-  if (request?.action !== 'createNITabs') return;
+  if (request?.action !== "createNITabs") return;
 
-  const MIDValue = String(request.mid); // already sanitized in popup
+  const MIDValue = String(request.mid);
   const URLs = [
     `https://ui.awin.com/tracking-settings/us/awin/advertiser/${MIDValue}/main-settings`,
     `https://ui.awin.com/awin/merchant/${MIDValue}/settings/invite-user`,
@@ -116,30 +103,12 @@ chrome.runtime.onMessage.addListener((request) => {
     `https://ui.awin.com/provider/pre-join-publishers?advertiserId=${MIDValue}`
   ];
 
-  createImplTabs(URLs, MIDValue);
+  createTabGroup(URLs, MIDValue, "implTool");
 });
 
-// Start Internal Review Tool
-function createIRGroupTabs(urls, mid) {
-  const tabIds = [];
-
-  urls.forEach((url) => {
-    chrome.tabs.create({ url, active: false }, (tab) => {
-      if (!tab || typeof tab.id !== 'number') return;
-      tabIds.push(tab.id);
-
-      if (tabIds.length === urls.length) {
-        chrome.tabs.group({ tabIds }, (groupId) => {
-          if (typeof groupId !== 'number') return;
-          chrome.tabGroups.update(groupId, { title: `${mid} IR`, color: 'orange' });
-        });
-      }
-    });
-  });
-}
-
+// Internal Review Tool
 chrome.runtime.onMessage.addListener((request) => {
-  if (request?.action !== 'createIRTabs') return;
+  if (request?.action !== "createIRTabs") return;
 
   const MIDValue = String(request.mid); // already sanitized in popup
   const URLs = [
@@ -156,7 +125,7 @@ chrome.runtime.onMessage.addListener((request) => {
     `https://ui.awin.com/provider/migrated-advertiser-settings/${MIDValue}`
   ];
 
-  createIRGroupTabs(URLs, MIDValue);
+  createTabGroup(URLs, MIDValue, "irTool");
 });
 
 // Tech Detection Script Listeners and Badge
@@ -164,35 +133,55 @@ const mem = new Map();
 
 async function setDetections(tabId, items) {
   mem.set(tabId, items);
-  await chrome.storage.session.set({ ['det_'+tabId]: { items, ts: Date.now() } });
+  await chrome.storage.session.set({ ["awh_det_" + tabId]: { items, ts: Date.now() } });
 }
 
 async function getDetections(tabId) {
   if (mem.has(tabId)) return mem.get(tabId);
-  const obj = await chrome.storage.session.get('det_'+tabId);
-  return obj?.['det_'+tabId]?.items || [];
+  const obj = await chrome.storage.session.get("awh_det_" + tabId);
+  return obj?.["awh_det_" + tabId]?.items || [];
 }
 
 function setBadge(tabId, count) {
-  chrome.action.setBadgeText({ tabId, text: count ? String(count) : '' });
-  chrome.action.setBadgeBackgroundColor({ color: '#FF9550' });
+  chrome.action.setBadgeText({ tabId, text: count ? String(count) : "" });
+  chrome.action.setBadgeBackgroundColor({ color: "#FF9550" });
 }
 
 // Content script reports
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg?.type === 'TECH_DETECTIONS') {
+  // Salesforce page MID (bootstrap.js) -> session storage for Dock auto fill
+  if (msg?.type === "AWH_SF_MID") {
+    const tabId = sender?.tab?.id;
+    if (Number.isInteger(tabId)) {
+      const key = "awh_sf_mid_" + tabId;
+      const mid = /^\d+$/.test(String(msg.mid || "")) ? String(msg.mid) : "";
+      (mid
+        ? chrome.storage.session.set({ [key]: { mid, ts: Date.now() } })
+        : chrome.storage.session.remove(key)
+      ).catch(() => {}); // session storage unavailable; Dock just won't offer auto fill
+    }
+    sendResponse({ success: true });
+    return;
+  }
+  if (msg?.type === "TECH_DETECTIONS") {
     const tabId = sender?.tab?.id;
     if (Number.isInteger(tabId)) {
       setDetections(tabId, msg.items || []).then(() => setBadge(tabId, msg.items?.length || 0));
+      sendResponse({ success: true });
     }
+    return true;
   }
-  if (msg?.type === 'GET_TECH_DETECTIONS') {
+  if (msg?.type === "GET_TECH_DETECTIONS") {
     const tabId = msg.tabId;
+    if (!Number.isInteger(tabId)) {
+      sendResponse({ items: [] });
+      return;
+    }
     (async () => {
       const items = await getDetections(tabId);
       if (!items.length) {
         // ask the content script in that tab to re-run immediately
-        try { chrome.tabs.sendMessage(tabId, { type: 'REDETECT_NOW' }); } catch {}
+        chrome.tabs.sendMessage(tabId, { type: "REDETECT_NOW" }).catch(() => {}); // no content script on this tab
       }
       sendResponse({ items });
     })();
@@ -216,15 +205,17 @@ chrome.windows.onFocusChanged.addListener(async () => {
 // Clear state when tabs truly go away or reload
 chrome.tabs.onRemoved.addListener((tabId) => {
   mem.delete(tabId);
-  chrome.storage.session.remove('det_'+tabId);
+  chrome.storage.session.remove(["awh_det_" + tabId, "awh_sf_mid_" + tabId]);
 });
 chrome.tabs.onUpdated.addListener((tabId, info) => {
   if (info.discarded === true) { // tab got discarded
     // keep storage; badge can reflect last known
     return;
   }
-  if (info.status === 'loading') {
+  if (info.status === "loading") {
     mem.delete(tabId);
+    chrome.storage.session.remove("awh_det_" + tabId); // don't let Glance render the previous page's cache
+    // awh_sf_mid_ is kept: Lightning SPA navigations can report "loading", and bootstrap.js only republishes on change
     setBadge(tabId, 0);
     // content script will re-emit on DOMContentLoaded; if it doesn’t, popup will ping via GET handler
   }

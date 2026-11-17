@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "2.4.0.1",
+  "version": "3.0",
   "author": "Andrew Niziolek",
 
   "name": "Awin Helper",
@@ -18,12 +18,15 @@
 
   "action": {"default_popup": "popup.html"},
 
+  "side_panel": {"default_path": "sidepanel.html"},
+
   "permissions": 
   ["storage", 
   "tabs",
   "activeTab",
   "scripting",
-  "tabGroups"
+  "tabGroups",
+  "sidePanel"
   ],
 
   "host_permissions":
@@ -34,7 +37,7 @@
 
   "web_accessible_resources": [
   {
-    "resources": ["scripts/injected.js", "assets/icon48.png", "css/sfpanel.css", "css/panel-global.css"],
+    "resources": ["scripts/injected.js", "assets/icon48.png", "css/sfpanel.css", "css/panel-global.css", "fonts/*.woff2"],
     "matches": ["*://*.lightning.force.com/*"]
   }
   ],
@@ -48,7 +51,7 @@
     },
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["scripts/techDetectCS.js"],
+      "js": ["scripts/trackingDetect.js", "scripts/techDetectCS.js"],
       "run_at": "document_idle"
     }
   ]

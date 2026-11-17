@@ -1,0 +1,287 @@
+/* Global CSS Components*/
+
+:root {
+  /* 1. Core Palette */
+  --color-orange-light: #FF9550;
+  --color-orange-base: #FF7D28;
+  --color-orange-dark: #FF6600;
+  --color-orange-darker: #af4600;
+
+  --color-white: #ffffff;
+  --color-off-white: #f8f4f0;
+  --color-gray-100: #e5e5e5;
+  --color-gray-200: #adadad;
+  --color-gray-300: #a1a1a1;
+  --color-gray-500: #777573;
+  --color-gray-800: #3e3c3b;
+  --color-black: #101010;
+
+  --color-error: #d32f2f;
+  --color-success: #2e7d32;
+
+  /* Dark core (warm near-blacks matched to the off-white brand) */
+  --color-dark-900: #161413;
+  --color-dark-800: #1f1c1a;
+  --color-dark-700: #2a2725;
+  --color-dark-600: #3a3633;
+  --color-dark-500: #57524e;
+  --color-light-text: #f2eee9;
+  --color-light-text-2: #a8a39e;
+
+  /* 2a. Theme Tokens (--awh-*). light-dark() resolves from color-scheme:
+     system = "light dark" (follows OS), light/dark forced via [data-awh-theme] */
+  color-scheme: light dark;
+
+  --awh-bg-primary: light-dark(var(--color-off-white), var(--color-dark-900));
+  --awh-bg-secondary: light-dark(var(--color-gray-100), var(--color-dark-700));
+  --awh-surface: light-dark(var(--color-white), var(--color-dark-800));
+  --awh-surface-hover: light-dark(#f2ede8, var(--color-dark-700));
+
+  --awh-text-primary: light-dark(var(--color-black), var(--color-light-text));
+  --awh-text-secondary: light-dark(var(--color-gray-500), var(--color-light-text-2));
+  --awh-text-muted: light-dark(var(--color-gray-300), #7d7873);
+  --awh-text-on-accent: var(--color-black); /* text on orange fills, both themes */
+
+  --awh-border: light-dark(var(--color-gray-100), var(--color-dark-600));
+  --awh-border-strong: light-dark(var(--color-gray-300), var(--color-dark-500));
+  --awh-accent: light-dark(var(--color-orange-dark), var(--color-orange-base));
+
+  --awh-shadow: light-dark(rgba(16, 16, 16, 0.15), rgba(0, 0, 0, 0.5));
+  --awh-shadow-row: 0 0 3px light-dark(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6));
+  --awh-scrollbar-track: light-dark(var(--color-gray-100), #242424);
+  --awh-tooltip-bg: light-dark(var(--color-gray-800), var(--color-dark-600));
+
+  /* Status (ok / warn / bad / info) */
+  --awh-status-ok-text: light-dark(#18a45b, #3ccf82);
+  --awh-status-bad-text: light-dark(#c23934, #ff6b7f);
+
+  --awh-status-info-bg: light-dark(#dfeaff, #1a2a4a);
+  --awh-status-info-text: light-dark(#083b9a, #b7cdff);
+  --awh-status-info-border: light-dark(#e6f0ff, #2c4373);
+  --awh-status-info-icon: light-dark(#2f6fed, #7aa5ff);
+
+  --awh-status-warn-bg: light-dark(#ffe7bf, #3d2c0c);
+  --awh-status-warn-text: light-dark(#7a4b00, #ffd28c);
+  --awh-status-warn-border: light-dark(#ffd28c, #6b4a12);
+  --awh-status-warn-icon: light-dark(#b36b00, #f0a640);
+
+  --awh-status-bad-bg: light-dark(#ffc9cf, #45141c);
+  --awh-status-crit-text: light-dark(#7a0013, #ffc9cf);
+  --awh-status-bad-border: light-dark(#ffd6dc, #7a2633);
+  --awh-status-bad-icon: light-dark(#b1001d, #ff6b7f);
+
+  /* 2b. Semantic Tokens (aliases onto the theme layer) */
+  --bg-body: var(--awh-bg-primary);
+  --bg-surface: var(--awh-surface);
+  --bg-surface-alt: var(--awh-bg-secondary);
+  --bg-tooltip: var(--awh-tooltip-bg);
+
+  --text-primary: var(--awh-text-primary);
+  --text-secondary: var(--awh-text-secondary);
+  --text-inverse: var(--color-white);
+  --text-accent: var(--awh-accent);
+
+  --border-subtle: var(--awh-border);
+  --border-base: var(--awh-border-strong);
+  --border-focus: var(--color-orange-base);
+
+  /* 3. Component Tokens */
+  --btn-primary-bg: var(--color-orange-base);
+  --btn-primary-hover: var(--color-orange-dark);
+  --btn-primary-text: var(--color-white);
+  
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: var(--awh-border-strong);
+  --btn-secondary-hover: var(--awh-bg-secondary);
+
+  --input-bg: var(--awh-surface);
+  --input-border: var(--border-base);
+  --input-text: var(--text-primary);
+  --input-focus-ring: 0 0 0 3px rgba(255, 125, 40, 0.2);
+
+  --link-color: var(--awh-accent);
+  --link-hover: var(--color-orange-darker);
+
+  /* 4. Effects & Spatial */
+  --shadow-sm: 0 2px 4px light-dark(rgba(16, 16, 16, 0.05), rgba(0, 0, 0, 0.3));
+  --shadow-md: 0 5px 10px var(--awh-shadow);
+  --shadow-lg: 0 10px 25px light-dark(rgba(16, 16, 16, 0.2), rgba(0, 0, 0, 0.6));
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-round: 50%;
+}
+
+html{
+    width: 600px;
+    max-height: 600px;
+    min-height: 275px;
+}
+
+body{
+    background: var(--bg-body);
+    width: 100%;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: grayscale
+}
+
+/* Theme modes (set by scripts/theme.js before first paint) */
+:root[data-awh-theme="light"] { color-scheme: light; }
+:root[data-awh-theme="dark"]  { color-scheme: dark; }
+
+/* Theme switcher (System / Light / Dark) */
+.themeSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--awh-border);
+  border-radius: 25px;
+  background-color: var(--awh-bg-secondary);
+}
+
+.themeSwitch__btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  padding: 4px 8px;
+  color: var(--awh-text-secondary);
+  background: none;
+  border: 0;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.themeSwitch__btn:hover { color: var(--awh-text-primary); }
+
+.themeSwitch__btn.is-active {
+  color: var(--awh-text-on-accent);
+  background-color: var(--color-orange-light);
+}
+
+.themeSwitch__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--input-focus-ring);
+}
+
+/* Scroll Bar */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--awh-scrollbar-track);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--color-orange-base);
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--bg-tooltip);
+    color: var(--text-inverse);
+    padding: 5px;
+    border-radius: 3px;
+    white-space: normal;
+    width: max-content;
+    max-width: 240px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+    text-align: center;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.chipEasy{
+  background-color: #18a45b;
+}
+
+.chipModerate{
+  background-color: #d99b15;
+}
+
+.chipDifficult{
+  background-color: #DE0732;
+}
+
+.chip .chipIcon{
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.chip .chipIcon use,
+.chip .chipIcon path,
+.chip .chipIcon svg{
+  fill: currentColor;
+}
+
+.chip{
+  font-size: 12px;
+  color: white;
+  border-radius: 15px;
+  height: min-content;
+  width: min-content;
+  margin-top: 27px;
+  margin-right: 15px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.chip:hover {
+  border-color: #ff6600b0;
+}
+
+.chipAwin {
+  white-space: nowrap;
+  background: linear-gradient(
+    270deg,
+    #de0732 0%,
+    #FF6600 20%,
+    #fab418 50%,
+    #DE0732 100%
+
+  );
+  background-size: 400% 100%;
+  animation: scrollGradient 15s linear infinite;
+  color: white;
+}
+
+/*Ref Aw Colors*/
+.st0{fill:#FF6600;}
+.st1{fill:#E74030;}
+.st2{fill:#FAB418;}
+.st3{fill:#DE0732;}
+.st4{fill:#DE0733;}
+.st5{fill:#CC1D46;}

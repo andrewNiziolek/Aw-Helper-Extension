@@ -1,0 +1,623 @@
+/* Popup Styling — "Glance" view */
+.headerContainer {
+  max-width: 97%;
+}
+
+/* Header Styling */
+.headerDiv {
+  color: var(--color-off-white);
+  grid-area: header;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* mirrors .extBody columns */
+  gap: 0 10px;
+  align-items: center;
+  background: linear-gradient(90deg, #FF7D28 0%, #ff6600 20%, #de0732 100%); /* static brand gradient */
+  height: 2.5rem;
+  padding: 0 10px; /* matches .glanceCard text inset */
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+.headText {
+  margin: 0;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.headActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+
+.headAttrib,
+.headAttrib2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  padding: 4px; /* larger click target around the icon */
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color .2s;
+}
+
+.headAttrib:hover,
+.headAttrib2:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.headAttrib svg,
+.headAttrib2 svg {
+  width: 100%;
+  height: 100%;
+}
+
+.headerDiv .themeSwitch {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.headerDiv .themeSwitch__btn { color: var(--color-off-white); }
+.headerDiv .themeSwitch__btn:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+.headerDiv .themeSwitch__btn.is-active {
+  color: var(--color-orange-dark);
+  background-color: var(--color-white);
+}
+
+.headVer {
+  margin: 0 0 0 4px;
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.extBody {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-rows: 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 0px 10px;
+  max-width: 97%;
+}
+
+.leftContainer {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.rightContainer {
+  grid-area: 1 / 2 / 2 / 3;
+}
+
+.siteInfoDiv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  height: 40px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+  border: none;
+  background-color: var(--awh-bg-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+.siteURL {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 10px;
+}
+
+/* --- Glance Cards --- */
+.glanceCard {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 5px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  text-align: left;
+  box-shadow: var(--awh-shadow-row);
+}
+
+.glanceCard__title {
+  margin: 0 0 6px 0;
+  padding-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.glanceEmpty {
+  margin: 4px 0;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.glanceCard .chip {
+  margin: 0;
+  width: auto;
+  white-space: nowrap;
+}
+
+.is-hidden { display: none !important; }
+
+/* Compatibility */
+.glanceCompat__body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+
+.compatText {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+}
+
+/* Tech Summary rows */
+.glanceRow {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.glanceRow:last-child { border-bottom: none; }
+
+.glanceRow__icon {
+  width: 24px;
+  height: 24px;
+}
+
+.glanceRow__icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.glanceRow.has-sub { border-bottom: none; }
+
+.glanceRow__name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right-anchor tooltips on row chips so they don't clip at the popup edge */
+.glanceRow .tooltip::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+/* Consent / App */
+.glanceKV {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  font-size: 13px;
+}
+
+.glanceKV__key {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.glanceKV__val {
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+/* Open Dock */
+.dockButton {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px; /* matches .siteInfoDiv */
+  margin: 0 0 10px 0;
+  box-shadow: var(--shadow-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-orange-base);
+  background-color: var(--bg-surface);
+  border: 1.9px solid var(--color-orange-base);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.dockButton:hover {
+  color: var(--bg-body);
+  background-color: var(--color-orange-base);
+}
+
+.dockButton:active {
+  color: var(--awh-text-on-accent);
+  background-color: var(--color-orange-light);
+}
+
+.dockButton:focus-visible {
+  outline: none;
+  box-shadow: var(--input-focus-ring);
+}
+
+/* Awin UI: MID + Provider Area on one row */
+.awinMIDRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.glanceAwin__btn {
+  width: auto;
+  height: 28px;
+  margin: 0;
+  padding: 0 14px;
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.dockButton:disabled,
+.dockButton:disabled:hover {
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  border-color: var(--border-base);
+  cursor: not-allowed;
+}
+
+/* --- Legacy tools (parked/hidden until Step 4 moves them into the Dock) --- */
+.glanceTools[hidden] { display: none; }
+
+/* Fieldset */
+.field_set {
+  border: 2px solid var(--bg-body);
+  margin-top: 5px;
+  border-radius: 3px;
+}
+
+/* Clipboard */
+.clipDiv {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr .5fr;
+  gap: 4px;
+  margin: 3px 0px 3px 0px;
+}
+
+.clipInput {
+  border-radius: 5px;
+  height: 25px;
+  color: var(--text-primary);
+  border: 1px solid var(--awh-border);
+  background-color: var(--bg-body);
+  text-align: left;
+  padding-left: 10px;
+}
+
+.clipInput::placeholder {
+  color: var(--text-primary);
+}
+
+/* Collapsibles */
+.collapsible {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  height: 40px;
+  width: 100%;
+  border: none;
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 14px;
+  background-color: var(--awh-surface);
+  color: var(--text-primary);
+  border-radius: 5px;
+  margin-top: 5px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 3px 3px light-dark(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6));
+}
+
+.collapsible:hover,
+.collapsible.active {
+  background-color: var(--color-orange-light);
+  color: var(--awh-text-on-accent);
+}
+
+.collapsible-icon {
+  font-size: 14px;
+  font-weight: 700;
+  position: relative;
+  top: 0px;
+  color: currentColor;
+  transition: color 0.2s;
+}
+
+.collapsible.active .collapsible-icon {
+  color: var(--color-orange-light);
+}
+
+.collapse-content {
+  color: var(--text-primary);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.1s ease-in-out;
+}
+
+.newImplDiv {
+  margin-bottom: 2px;
+}
+
+.testURLDiv {
+  display: grid;
+  gap: 4px;
+  place-items: center;
+  margin-top: 5px;
+  margin-bottom: 2px;
+}
+
+/* Tool actions */
+.append-button {
+  color: var(--color-orange-base);
+  background-color: var(--bg-body);
+  border: 1.9px solid var(--color-orange-base);
+  border-radius: 25px;
+  margin: 5px;
+  transition: 0.2s;
+}
+
+.append-button:hover {
+  color: var(--bg-body);
+  background-color: var(--color-orange-base);
+  border: 1.9px solid var(--color-orange-base);
+  cursor: pointer;
+}
+
+.append-button:active {
+  color: var(--awh-text-on-accent);
+  background-color: var(--color-orange-light);
+}
+
+/* Announcements */
+.announceDisplay {
+  display: none;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  height: 80px;
+  color: var(--text-primary);
+  border: none;
+  background-color: var(--awh-surface);
+  justify-content: center;
+  vertical-align: middle;
+  z-index: 2;
+  box-shadow: var(--awh-shadow-row);
+}
+
+.announceIcon {
+  margin-top: 0px;
+  margin-left: 5px;
+  align-items: center;
+}
+
+.announceData {
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+}
+
+.techReadout {
+  text-align: left;
+  margin-left: 15px;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+#announceText {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.announceReadout {
+  text-align: left;
+  margin-left: 15px;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 12px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+}
+
+.announceAdditionalInfo {
+  display: none;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  height: 40px;
+  color: var(--text-primary);
+  border: none;
+  background-color: var(--awh-bg-secondary);
+  justify-content: center;
+  vertical-align: middle;
+  z-index: 2;
+}
+
+.announceDisplay.is-visible { display: grid; }
+.announceDisplay.is-info { background-color: var(--awh-surface); border: 1px solid var(--awh-status-info-border); }
+.announceDisplay.is-warning { background-color: var(--awh-surface); border: 1px solid var(--awh-status-warn-border); }
+.announceDisplay.is-critical { background-color: var(--awh-surface); border: 1px solid var(--awh-status-bad-border); }
+
+.announceIcon { color: var(--awh-text-secondary); } /* default bell icon (fill: currentColor) */
+.announceDisplay.is-info .announceIcon { color: var(--awh-status-info-icon); }
+.announceDisplay.is-warning .announceIcon { color: var(--awh-status-warn-icon); }
+.announceDisplay.is-critical .announceIcon { color: var(--awh-status-bad-icon); }
+
+.announceIcon svg { display: block; }
+
+.chipInfo { background-color: var(--awh-status-info-bg); color: var(--awh-status-info-text); }
+.chipWarning { background-color: var(--awh-status-warn-bg); color: var(--awh-status-warn-text); }
+.chipCritical { background-color: var(--awh-status-bad-bg); color: var(--awh-status-crit-text); }
+
+.announceChip {
+  margin-right: 15px;
+  margin-bottom: 25px;
+}
+
+.announceAdditionalInfo.is-open { display: block; height: auto; min-height: 40px; }
+
+.announceMore__inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.announceMore__body {
+  flex: 1 1 auto;
+  text-align: left;
+  margin-right: 10px;
+}
+
+.announceMore__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.annLink {
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 25px;
+  border: 1.5px solid var(--color-orange-base);
+  color: var(--color-orange-base);
+  background: var(--awh-surface);
+  transition: 0.2s;
+}
+
+.annLink:hover {
+  color: var(--bg-body);
+  background: var(--color-orange-base);
+  border-color: var(--color-orange-base);
+}
+
+.annDismiss {
+  all: unset;
+  padding: 6px 10px;
+  border-radius: 25px;
+  border: 1.5px solid var(--awh-border-strong);
+  color: var(--awh-text-primary);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.annDismiss:hover { border-color: var(--color-orange-dark); color: var(--color-orange-dark); }
+
+/* Shopify Copy (sub-row under the Shopify detection) */
+.glanceSubRow {
+  position: relative;
+  margin: 0 0 6px 34px; /* align with the row name (24px icon + 10px gap) */
+  border-radius: 5px;
+  background-color: var(--bg-surface-alt);
+}
+
+.glanceSubRow:last-child { margin-bottom: 0; }
+
+#myShopifyText {
+  display: block;
+  position: relative;
+  line-height: 28px;
+  padding: 0 26px 0 10px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+#copyMyShopifyIcon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s, fill 0.3s ease;
+}
+
+#copyMyShopifyIcon svg {
+  display: block;
+  fill: var(--text-primary);
+}
+
+#myShopifyText:hover #copyMyShopifyIcon {
+  opacity: 1;
+}
+
+#myShopifyInfo.copyFlash {
+  animation: flashBg 900ms ease;
+}
+
+@keyframes flashBg {
+  0%   { background-color: var(--bg-surface-alt); }
+  20%  { background-color: var(--color-orange-base); }
+  80%  { background-color: var(--color-orange-base); }
+  100% { background-color: var(--bg-surface-alt); }
+}
+
+#myShopifyInfo.copyFlash #myShopifyText {
+  color: var(--bg-body);
+}
+
+#myShopifyInfo.copyFlash #copyMyShopifyIcon svg {
+  fill: var(--bg-body);
+}
+
+/* Brand gradient (matches panel-global.css / sidepanel.css) */
+@keyframes scrollGradient {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Logos */
+.st0 { fill: #FF6600; }
+.st1 { fill: #E74030; }
+.st2 { fill: #FAB418; }
+.st3 { fill: #DE0732; }
+.st4 { fill: #DE0733; }
+.st5 { fill: #CC1D46; }
