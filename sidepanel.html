@@ -1,33 +1,123 @@
 <!DOCTYPE html>
+<!--
+  Awin Helper
+  Copyright (c) 2023-2026 Andrew Niziolek
+  Licensed under AGPL-3.0-or-later
+  https://www.gnu.org/licenses/agpl-3.0.html
+  https://github.com/andrewNiziolek/Aw-Helper-Extension
+  Fingerprint: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="assets/icon.png" />
   <link rel="stylesheet" href="css/global-main.css">
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/sidepanel.css">
+  <title>Awin Helper Dock</title>
 </head>
 <body>
   <!-- Thin animated gradient line -->
   <div class="panel-header-line"></div>
-  <div class="panel-header-bar">
-    
-  </div>
-  
+  <header class="panel-header-bar">
+    <div class="dockHead__title">
+      <h1 class="dockHead__text">Awin Helper</h1>
+      <span class="dockHead__label">Dock</span>
+    </div>
+    <p class="headVer">x.x</p>
+  </header>
+  <p class="dockSiteURL" id="dockSiteURL">Loading…</p>
+
   <!-- Main scrollable body -->
-  <div class="panel-body">
-    
-    <!-- Inner Card 1 -->
-    <div class="inner-card">
-      <h3>Tech Detections</h3>
-      <p>GTM Found</p>
-    </div>
+  <main class="panel-body">
 
-    <!-- Inner Card 2 -->
-    <div class="inner-card">
-      <h3>Implementation</h3>
-      <p>MID input goes here.</p>
-    </div>
+    <!-- Dock 1: Tech Detection Readout -->
+    <section class="inner-card dockCard" id="dockTech">
+      <h3>Tech Detection</h3>
+      <div class="dockCompat">
+        <span class="chip chipModerate is-hidden" id="dockCompatChip"></span>
+        <p class="dockCompat__text" id="dockCompatText">Scanning…</p>
+      </div>
+      <div id="techContainer">
+        <p class="dockEmpty">Scanning…</p>
+      </div>
+    </section>
 
-  </div>
+    <!-- Dock 2: Consent Details -->
+    <section class="inner-card dockCard">
+      <h3>Consent</h3>
+      <div id="dockConsent">
+        <p class="dockEmpty">Scanning…</p>
+      </div>
+    </section>
 
+    <!-- Dock 3: App Detection Details -->
+    <section class="inner-card dockCard">
+      <h3>App Detection</h3>
+      <div id="dockApp">
+        <p class="dockEmpty">Not checked</p>
+      </div>
+    </section>
+
+    <!-- Dock 4: Clipboard (clipSaver.js) -->
+    <section class="inner-card dockCard" id="clipboard">
+      <h3>Clipboard</h3>
+      <div class="clipDiv">
+        <input type="text" id="clipMID" placeholder="Merchant ID" class="clipInput">
+        <input type="text" id="clipCR" placeholder="Commission Rate" class="clipInput">
+        <input type="text" id="clipNF" placeholder="Network Fee" class="clipInput">
+        <button type="button" class="append-button" id="clearClipBtn">Clear</button>
+      </div>
+    </section>
+
+    <!-- Dock 5: Tools & Test URL Gen (toolHelpers.js) -->
+    <section class="inner-card dockCard">
+      <h3>Tools</h3>
+
+      <button class="collapsible" id="newImplView">
+        <span class="collapsible-label">New Implementation</span>
+        <span class="collapsible-icon">+</span>
+      </button>
+      <div class="collapse-content">
+        <p>Please enter the new MID.</p>
+        <div class="dockToolRow">
+          <input type="text" id="implMIDBox" placeholder="Merchant ID" class="clipInput">
+          <button type="button" class="append-button" id="newImplBtn">Go</button>
+        </div>
+      </div>
+
+      <button class="collapsible" id="intReviewView">
+        <span class="collapsible-label">Internal Review</span>
+        <span class="collapsible-icon">+</span>
+      </button>
+      <div class="collapse-content">
+        <p>Please enter an MID.</p>
+        <div class="dockToolRow">
+          <input type="text" id="inRevMIDBox" placeholder="Merchant ID" class="clipInput">
+          <button type="button" class="append-button" id="intRevBtn">Go</button>
+        </div>
+      </div>
+
+      <button class="collapsible" id="testURLView">
+        <span class="collapsible-label">Test URL Generator</span>
+        <span class="collapsible-icon">+</span>
+      </button>
+      <div class="collapse-content">
+        <p>Enter an MID to generate a test URL.</p>
+        <div class="dockToolRow">
+          <input type="text" id="testURLMID" placeholder="Merchant ID" class="clipInput">
+          <button type="button" class="append-button" id="testURLBtn">Go</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="scripts/techConfig.js"></script>
+  <script src="scripts/sidepanel.js"></script>
+  <script src="scripts/clipSaver.js"></script>
+  <script src="scripts/toolHelpers.js"></script>
+  <script src="scripts/chipLinks.js"></script>
 </body>
 </html>

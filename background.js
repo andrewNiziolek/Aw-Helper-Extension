@@ -214,11 +214,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   if (msg?.type === "GET_TECH_DETECTIONS") {
     const tabId = msg.tabId;
+    if (!Number.isInteger(tabId)) {
+      sendResponse({ items: [] });
+      return;
+    }
     (async () => {
       const items = await getDetections(tabId);
       if (!items.length) {
         // ask the content script in that tab to re-run immediately
-        try { chrome.tabs.sendMessage(tabId, { type: "REDETECT_NOW" }); } catch {}
+        chrome.tabs.sendMessage(tabId, { type: "REDETECT_NOW" }).catch(() => {}); // no content script on this tab
       }
       sendResponse({ items });
     })();

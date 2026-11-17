@@ -1,22 +1,26 @@
-/* Override Global Sizing */
+/* Dock (side panel) */
+
+/* Override popup sizing from global-main.css */
 html, body {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  min-height: 0;
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100vh;
   box-sizing: border-box;
 }
 
-/* Main Panel Wrapper */
-.panel-container {
-  background-color: var(--bg-body, #f8f4f0);
+body {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-  overflow: hidden; 
+  text-align: left;
+  color: var(--text-primary);
 }
+
+*, *::before, *::after { box-sizing: inherit; }
+
+.is-hidden { display: none !important; }
 
 /* Thin Gradient Header */
 @keyframes scrollGradient {
@@ -37,7 +41,53 @@ html, body {
   );
   background-size: 400% 100%;
   animation: scrollGradient 15s linear infinite;
-  border-radius: 0 0 12px 12px; 
+  border-radius: 0 0 12px 12px;
+}
+
+/* Header bar */
+.panel-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 10px 16px 0 16px;
+}
+
+.dockHead__title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.dockHead__text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.dockHead__label {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-accent);
+}
+
+.headVer {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-secondary);
+}
+
+.dockSiteURL {
+  flex-shrink: 0;
+  margin: 3px 16px 0 16px;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Main Body & Layout */
@@ -48,31 +98,276 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  text-align: left;
-  border-radius: 12px 12px 0 0;
 }
 
-/* Inner Cards */
+/* Cards */
 .inner-card {
-  background-color: rgba(255, 255, 255, 0.15); 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border-radius: 12px; 
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  border-radius: 12px;
   padding: 16px;
 }
 
 .inner-card h3 {
   margin: 0 0 10px 0;
-  font-size: 14px;
-  color: var(--text-primary, #101010);
-  border-bottom: 1px solid var(--border-base, #a1a1a1);
   padding-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .inner-card p {
   margin: 0;
   font-size: 13px;
-  color: var(--text-secondary, #777573);
+  font-weight: 400;
+}
+
+.dockCard .chip {
+  margin: 0;
+  width: auto;
+  white-space: nowrap;
+}
+
+.dockEmpty {
+  margin: 4px 0;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.inner-card .dockEmpty { margin: 4px 0; }
+
+/* Compatibility line */
+.dockCompat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.inner-card .dockCompat__text { font-size: 14px; }
+
+/* Detection rows */
+.dockRow {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dockRow:last-child { border-bottom: none; }
+.dockRow.has-sub { border-bottom: none; }
+
+.dockRow__icon {
+  width: 24px;
+  height: 24px;
+}
+
+.dockRow__icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.inner-card .dockRow__name {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right-anchor tooltips so they don't clip at the panel edge */
+.dockRow .tooltip::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.dockRow__details {
+  margin: 0 0 6px 34px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dockRow__details:last-child { border-bottom: none; }
+
+.inner-card .dockRow__detail {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* Key / value rows */
+.dockKV {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  font-size: 13px;
+}
+
+.dockKV__key { color: var(--text-secondary); }
+.dockKV__val { overflow-wrap: anywhere; }
+
+.inner-card .dockNote {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* --- Shopify "click-to-copy" --- */
+.dockSubRow {
+  margin: 0 0 6px 34px;
+}
+
+.inner-card #myShopifyText {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  background-color: var(--bg-surface-alt);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  transition: background-color 0.2s;
+}
+
+.inner-card #myShopifyText:hover { background-color: var(--color-orange-light); }
+
+#copyMyShopifyIcon {
+  display: inline-flex;
+  color: var(--text-secondary);
+}
+
+#copyMyShopifyIcon svg {
+  display: block;
+  fill: currentColor;
+}
+
+#myShopifyInfo.copyFlash #myShopifyText {
+  background-color: var(--color-success);
+  color: var(--text-inverse);
+}
+
+#myShopifyInfo.copyFlash #copyMyShopifyIcon { color: var(--text-inverse); }
+
+/* --- Tools --- */
+.clipDiv {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.clipInput {
+  height: 25px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--input-text);
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 5px;
+  text-align: left;
+}
+
+.clipInput::placeholder { color: var(--text-secondary); }
+
+.clipInput:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: var(--input-focus-ring);
+}
+
+.append-button {
+  justify-self: center;
+  padding: 4px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-orange-base);
+  background-color: var(--bg-surface);
+  border: 1.9px solid var(--color-orange-base);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.append-button:hover {
+  color: var(--bg-body);
+  background-color: var(--color-orange-base);
+}
+
+.append-button:active {
+  color: var(--text-primary);
+  background-color: var(--color-orange-light);
+}
+
+.append-button:focus-visible {
+  outline: none;
+  box-shadow: var(--input-focus-ring);
+}
+
+.collapsible {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  margin-top: 6px;
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-primary);
+  background-color: var(--bg-surface-alt);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.collapsible:hover,
+.collapsible.active {
+  background-color: var(--color-orange-light);
+}
+
+.collapsible:focus-visible {
+  outline: none;
+  box-shadow: var(--input-focus-ring);
+}
+
+.collapsible-icon {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.collapse-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.1s ease-in-out;
+}
+
+.inner-card .collapse-content p {
+  margin: 8px 4px 4px 4px;
+  color: var(--text-secondary);
+}
+
+.dockToolRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px 6px 4px;
 }

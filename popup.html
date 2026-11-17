@@ -72,54 +72,6 @@
 					</div>
 				</div>
 
-				<!-- Legacy tools: parked (hidden) until Step 4 moves them into the Dock -->
-				<div class="glanceTools" id="glanceTools" hidden>
-					<fieldset class="field_set" id="clipboard">
-						<div class="clipDiv">
-							<input type="text" id="clipMID" placeholder="Merchant ID" class="clipInput">
-							<input type="text" id="clipCR" placeholder="Commission Rate" class="clipInput">
-							<input type="text" id="clipNF" placeholder="Network Fee" class="clipInput">
-							<button type="button" class="append-button" id="clearClipBtn">Clear</button>
-						</div>
-					</fieldset>
-
-					<button class="collapsible" id="newImplView">
-						<span class="collapsible-label">New Implementation</span>
-						<span class="collapsible-icon">+</span>
-					</button>
-					<div class="collapse-content">
-						<p>Please enter the new MID.</p>
-						<div class="newImplDiv">
-							<input type="text" id="implMIDBox" placeholder="Merchant ID" class="clipInput">
-							<button type="button" class="append-button" id="newImplBtn">Go</button>
-						</div>
-					</div>
-
-					<button class="collapsible" id="intReviewView">
-						<span class="collapsible-label">Internal Review</span>
-						<span class="collapsible-icon">+</span>
-					</button>
-					<div class="collapse-content">
-						<p>Please enter an MID.</p>
-						<div class="intReviewDiv">
-							<input type="text" id="inRevMIDBox" placeholder="Merchant ID" class="clipInput">
-							<button type="button" class="append-button" id="intRevBtn">Go</button>
-						</div>
-					</div>
-
-					<button class="collapsible" id="testURLView">
-						<span class="collapsible-label">Test URL Generator</span>
-						<span class="collapsible-icon">+</span>
-					</button>
-					<div class="collapse-content">
-						<p>Enter an MID to generate a test URL.</p>
-						<div class="testURLDiv">
-							<input type="text" id="testURLMID" placeholder="Merchant ID" class="clipInput">
-							<button type="button" class="append-button" id="testURLBtn">Go</button>
-						</div>
-					</div>
-				</div>
-				<script src="/scripts/clipSaver.js"></script>
 			</div>
 
 			<div class="rightContainer">
@@ -180,5 +132,4 @@
 		<script src="popup.js"></script>
 	</body>
 	<script src="/scripts/chipLinks.js"></script>
-	<script src="/scripts/toolHelpers.js"></script>
 </html>

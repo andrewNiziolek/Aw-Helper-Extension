@@ -11,7 +11,7 @@
   grid-template-columns: 1fr 1fr; /* mirrors .extBody columns */
   gap: 0 10px;
   align-items: center;
-  background: linear-gradient(90deg, #de0732 0%, #ff6600 20%, #de0732 100%); /* static brand gradient */
+  background: linear-gradient(90deg, #FF7D28 0%, #ff6600 20%, #de0732 100%); /* static brand gradient */
   height: 2.5rem;
   padding: 0 10px; /* matches .glanceCard text inset */
   margin-bottom: 5px;
