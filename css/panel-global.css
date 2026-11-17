@@ -40,24 +40,18 @@
   --color-gray-300: #a1a1a1;
   --color-gray-500: #777573;
   --color-black: #101010;
-  --color-dark-900: #161413;
-  --color-dark-800: #1f1c1a;
-  --color-dark-600: #3a3633;
-  --color-dark-500: #57524e;
-  --color-light-text: #f2eee9;
-  --color-light-text-2: #a8a39e;
 
-  /* Theme tokens (mirror global-main.css); light-dark() follows this element's color-scheme */
-  --awh-bg-primary: light-dark(var(--color-off-white), var(--color-dark-900));
-  --awh-surface: light-dark(var(--color-white), var(--color-dark-800));
-  --awh-text-primary: light-dark(var(--color-black), var(--color-light-text));
-  --awh-text-secondary: light-dark(var(--color-gray-500), var(--color-light-text-2));
+  /* Theme tokens: light values only. The SF card ignores awh_theme_mode to match Salesforce. */
+  --awh-bg-primary: var(--color-off-white);
+  --awh-surface: var(--color-white);
+  --awh-text-primary: var(--color-black);
+  --awh-text-secondary: var(--color-gray-500);
   --awh-text-on-accent: var(--color-black);
-  --awh-border: light-dark(#dddbda, var(--color-dark-600));
-  --awh-border-strong: light-dark(var(--color-gray-300), var(--color-dark-500));
-  --awh-accent: light-dark(var(--color-orange-dark), var(--color-orange-base));
-  --awh-shadow: light-dark(rgba(16, 16, 16, 0.15), rgba(0, 0, 0, 0.5));
-  --awh-status-bad-text: light-dark(#c23934, #ff6b7f);
+  --awh-border: #dddbda;
+  --awh-border-strong: var(--color-gray-300);
+  --awh-accent: var(--color-orange-dark);
+  --awh-shadow: rgba(16, 16, 16, 0.15);
+  --awh-status-bad-text: #c23934;
 
   --bg-body: var(--awh-bg-primary);
   --bg-surface: var(--awh-surface);
@@ -78,15 +72,11 @@
 #awin-helper-panel {
   position: relative; /* anchors the MID menu */
   font-family: var(--awh-font);
-  color-scheme: light; /* until bootstrap.js applies data-awh-theme */
+  color-scheme: light; /* always light, like the surrounding Salesforce UI */
   color: var(--awh-text-primary);
   background: var(--awh-surface);
   border-color: var(--awh-border) !important; /* overrides injected.js inline #dddbda */
 }
-
-/* Theme modes (data-awh-theme set by bootstrap.js from awh_theme_mode) */
-#awin-helper-panel[data-awh-theme="system"] { color-scheme: light dark; }
-#awin-helper-panel[data-awh-theme="dark"]   { color-scheme: dark; }
 
 /* --- Header --- */
 #awin-helper-panel .slds-card__header {

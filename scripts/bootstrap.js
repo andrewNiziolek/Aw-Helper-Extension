@@ -15,7 +15,6 @@
   let handleTimeout = null;
   let isHandling = false; // Flag to prevent concurrent executions of handleStateChange
   let lastPublishedMid; // undefined until the first publish so a null is still sent once
-  let themeMode = "system"; // awh_theme_mode, mirrored onto the panel as data-awh-theme
 
   console.log('[Awin Helper] Bootstrapper v5.2 (Case panel + TSE links) initializing...');
 
@@ -41,32 +40,6 @@
       });
     } catch {
       // extension context invalidated (extension reloaded)
-    }
-  }
-
-  // --- Theme (System / Light / Dark), set from Glance / Dock ---
-  const THEME_KEY   = "awh_theme_mode";
-  const THEME_MODES = ["system", "light", "dark"];
-
-  function applyPanelTheme() {
-    const panelEl = document.getElementById("awin-helper-panel");
-    if (panelEl) panelEl.setAttribute("data-awh-theme", themeMode);
-  }
-
-  function setThemeMode(mode) {
-    themeMode = THEME_MODES.includes(mode) ? mode : "system";
-    applyPanelTheme();
-  }
-
-  async function initPanelTheme() {
-    try {
-      const { [THEME_KEY]: stored } = await chrome.storage.local.get(THEME_KEY);
-      setThemeMode(stored);
-      chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === "local" && changes[THEME_KEY]) setThemeMode(changes[THEME_KEY].newValue);
-      });
-    } catch {
-      // extension context invalidated; panel keeps its light default
     }
   }
 
@@ -137,7 +110,6 @@
           const success = mod.injectCasePanelOnce(mid); // Pass the found MID (or null)
 
           if (success) {
-            applyPanelTheme(); // same task as the insert, so the panel never paints unthemed
             console.log(`[Awin Helper] Injection successful for case: ${caseIdOnPage}`);
             currentInjectedCaseId = caseIdOnPage; // Update state *only on successful injection*
           } else {
@@ -201,7 +173,6 @@
   }
 
   // Initialization
-  initPanelTheme();
   // Delay observer setup slightly to allow initial page elements to settle
   setTimeout(startObserver, OBSERVER_START_DELAY_MS);
 
