@@ -249,6 +249,32 @@
   box-shadow: var(--input-focus-ring);
 }
 
+/* Awin UI: MID + Provider Area on one row */
+.awinMIDRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.glanceAwin__btn {
+  width: auto;
+  height: 28px;
+  margin: 0;
+  padding: 0 14px;
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.dockButton:disabled,
+.dockButton:disabled:hover {
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  border-color: var(--border-base);
+  cursor: not-allowed;
+}
+
 /* --- Legacy tools (parked/hidden until Step 4 moves them into the Dock) --- */
 .glanceTools[hidden] { display: none; }
 

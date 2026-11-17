@@ -32,46 +32,19 @@
   <!-- Main scrollable body -->
   <main class="panel-body">
 
-    <!-- Dock 1: Tech Detection Readout -->
-    <section class="inner-card dockCard" id="dockTech">
-      <h3>Tech Detection</h3>
-      <div class="dockCompat">
-        <span class="chip chipModerate is-hidden" id="dockCompatChip"></span>
-        <p class="dockCompat__text" id="dockCompatText">Scanning…</p>
-      </div>
-      <div id="techContainer">
-        <p class="dockEmpty">Scanning…</p>
-      </div>
-    </section>
-
-    <!-- Dock 2: Consent Details -->
-    <section class="inner-card dockCard">
-      <h3>Consent</h3>
-      <div id="dockConsent">
-        <p class="dockEmpty">Scanning…</p>
+    <!-- Awin UI: jump to the active advertiser's Provider Area (awinUI.js) -->
+    <section class="inner-card dockCard is-hidden" id="dockAwin">
+      <h3>Awin UI</h3>
+      <div class="dockKV">
+        <span class="dockKV__key">Advertiser</span>
+        <span class="dockKV__val awinMIDRow">
+          <span id="dockAwinMID">—</span>
+          <button type="button" class="append-button dockAwin__btn" id="dockProviderAreaBtn">Provider Area</button>
+        </span>
       </div>
     </section>
 
-    <!-- Dock 3: App Detection Details -->
-    <section class="inner-card dockCard">
-      <h3>App Detection</h3>
-      <div id="dockApp">
-        <p class="dockEmpty">Not checked</p>
-      </div>
-    </section>
-
-    <!-- Dock 4: Clipboard (clipSaver.js) -->
-    <section class="inner-card dockCard" id="clipboard">
-      <h3>Clipboard</h3>
-      <div class="clipDiv">
-        <input type="text" id="clipMID" placeholder="Merchant ID" class="clipInput">
-        <input type="text" id="clipCR" placeholder="Commission Rate" class="clipInput">
-        <input type="text" id="clipNF" placeholder="Network Fee" class="clipInput">
-        <button type="button" class="append-button" id="clearClipBtn">Clear</button>
-      </div>
-    </section>
-
-    <!-- Dock 5: Tools & Test URL Gen (toolHelpers.js) -->
+    <!-- Dock 1: Tools & Test URL Gen (toolHelpers.js) -->
     <section class="inner-card dockCard">
       <h3>Tools</h3>
 
@@ -112,9 +85,45 @@
       </div>
     </section>
 
+    <!-- Dock 2: Tech Detection Readout -->
+    <section class="inner-card dockCard" id="dockTech">
+      <h3>Tech Detection</h3>
+      <div id="techContainer">
+        <p class="dockEmpty">Scanning…</p>
+      </div>
+    </section>
+
+    <!-- Dock 3: Consent Details -->
+    <section class="inner-card dockCard">
+      <h3>Consent</h3>
+      <div id="dockConsent">
+        <p class="dockEmpty">Scanning…</p>
+      </div>
+    </section>
+
+    <!-- Dock 4: App Detection Details -->
+    <section class="inner-card dockCard">
+      <h3>App Detection</h3>
+      <div id="dockApp">
+        <p class="dockEmpty">Not checked</p>
+      </div>
+    </section>
+
+    <!-- Dock 5: Clipboard (clipSaver.js) -->
+    <section class="inner-card dockCard" id="clipboard">
+      <h3>Clipboard</h3>
+      <div class="clipDiv">
+        <input type="text" id="clipMID" placeholder="Merchant ID" class="clipInput">
+        <input type="text" id="clipCR" placeholder="Commission Rate" class="clipInput">
+        <input type="text" id="clipNF" placeholder="Network Fee" class="clipInput">
+        <button type="button" class="append-button" id="clearClipBtn">Clear</button>
+      </div>
+    </section>
+
   </main>
 
   <script src="scripts/techConfig.js"></script>
+  <script src="scripts/awinUI.js"></script>
   <script src="scripts/sidepanel.js"></script>
   <script src="scripts/clipSaver.js"></script>
   <script src="scripts/toolHelpers.js"></script>

@@ -19,12 +19,12 @@ const ID_TO_CONFIG = {
   "magento":      "magento"
 };
 
-const EASE_RANK  = { chipEasy: 0, chipModerate: 1, chipDifficult: 2 };
-const EASE_LABEL = { chipEasy: "Easy", chipModerate: "Moderate", chipDifficult: "Difficult" };
 const EMPTY_GRACE_MS = 2500;
 
 let dockWindowId = null;
 let dockTabId    = null;
+let dockAwinTab  = null; // Awin UI tab + MID the Provider Area button acts on
+let dockAwinMID  = "";
 let refreshSeq   = 0; // bumps on every refresh so stale async results get dropped
 
 // --- HELPERS ---
@@ -54,36 +54,6 @@ function setSiteURL(text, isPlaceholder) {
 }
 
 // --- DOCK RENDERING ---
-function renderCompat(items) {
-  const compatChip = document.getElementById("dockCompatChip");
-  const compatText = document.getElementById("dockCompatText");
-  if (!compatText) return;
-
-  // Easiest detected platform wins (MasterTag and CMP aren't platforms)
-  let best = null;
-  items.forEach(it => {
-    if (it.id === "dwin1" || it.id === "cmp") return;
-    const tech = TECH_CONFIG[ID_TO_CONFIG[it.id]];
-    if (!tech || !(tech.chipClass in EASE_RANK)) return;
-    if (!best || EASE_RANK[tech.chipClass] < EASE_RANK[best.chipClass]) best = tech;
-  });
-
-  compatText.style.fontStyle = "";
-  if (!best) {
-    compatText.textContent = "Please submit integration for manual review.";
-    if (compatChip) compatChip.classList.add("is-hidden");
-    return;
-  }
-
-  compatText.textContent = best.chipClass === "chipDifficult"
-    ? `${best.name} detected.`
-    : `Site is compatible! ${best.name} detected.`;
-  if (compatChip) {
-    compatChip.className = `chip ${best.chipClass}`;
-    compatChip.textContent = EASE_LABEL[best.chipClass];
-  }
-}
-
 function renderTechReadout(items) {
   const container = document.getElementById("techContainer");
   if (!container) return;
@@ -142,83 +112,156 @@ function renderTechReadout(items) {
   dkInitShopifyCopy(); // no-op when no Shopify URL was rendered
 }
 
+// --- CONSENT & APP DETAIL HELPERS ---
+const SOURCE_LABEL = { script: "Script", cookie: "Cookie", dom: "Page element" };
+const GCM_STATE    = { granted: ["is-granted", "Granted"], denied: ["is-denied", "Denied"] };
+
+function dkKV(key, valHTML) {
+  return `
+    <div class="dockKV">
+      <span class="dockKV__key">${escapeHTML(key)}</span>
+      <span class="dockKV__val">${valHTML}</span>
+    </div>`;
+}
+
+function dkStateText(flag) {
+  if (flag === true)  return `<span class="dockState is-granted">Granted</span>`;
+  if (flag === false) return `<span class="dockState is-denied">Denied</span>`;
+  return "Unset";
+}
+
+function dkGcmText(state) {
+  const entry = GCM_STATE[state];
+  return entry ? `<span class="dockState ${entry[0]}">${entry[1]}</span>` : "Unset";
+}
+
 function renderConsent(items) {
   const consentEl = document.getElementById("dockConsent");
   if (!consentEl) return;
 
-  const providers = items.find(it => it.id === "cmp")?.meta?.providers || [];
-  if (!providers.length) {
+  const meta = items.find(it => it.id === "cmp")?.meta;
+  if (!meta) {
     consentEl.innerHTML = `<p class="dockEmpty">None detected</p>`;
     return;
   }
 
-  consentEl.innerHTML = providers.map((name, n) => `
-    <div class="dockKV">
-      <span class="dockKV__key">${n === 0 ? "Providers" : ""}</span>
-      <span class="dockKV__val">${escapeHTML(name)}</span>
-    </div>
-  `).join("");
+  // Legacy payload (names only): cached from before the Step 5 content script
+  const details = meta.details;
+  if (!details) {
+    consentEl.innerHTML = (meta.providers || []).map((name, n) => dkKV(n === 0 ? "Providers" : "", escapeHTML(name))).join("");
+    return;
+  }
+
+  const parts = [];
+
+  // 1. Providers: detection sources + parsed category choices
+  (details.providers || []).forEach(p => {
+    const via = (p.sources || []).map(s => SOURCE_LABEL[s] || s).join(" · ");
+    parts.push(dkKV("Provider", `${escapeHTML(p.name)}${via ? `<p class="dockRow__detail">via ${escapeHTML(via)}</p>` : ""}`));
+
+    const categories = Object.entries(p.state?.categories || {});
+    if (categories.length) {
+      categories.forEach(([label, flag]) => parts.push(dkKV(label, dkStateText(flag))));
+      if (!p.state.interacted) parts.push(`<p class="dockNote">Defaults: the visitor hasn't answered the ${escapeHTML(p.name)} banner yet.</p>`);
+    } else if (p.state?.note) {
+      parts.push(dkKV("Choices", escapeHTML(p.state.note)));
+    } else {
+      parts.push(dkKV("Choices", p.state?.interacted ? "Answered (categories unreadable)" : "Not set yet"));
+    }
+  });
+
+  // 2. Frameworks
+  const fw = details.frameworks || {};
+  if (fw.tcf?.present) parts.push(dkKV("IAB TCF v2", fw.tcf.tcString ? "TC string stored" : "Detected · no TC string yet"));
+  if (fw.gpp?.present) parts.push(dkKV("IAB GPP", "Detected"));
+  if (fw.gcm?.present) {
+    parts.push(dkKV("GCM ads", dkGcmText(fw.gcm.ad_storage)));
+    parts.push(dkKV("GCM analytics", dkGcmText(fw.gcm.analytics_storage)));
+  }
+
+  // 3. Banner
+  parts.push(dkKV("Banner", details.banner ? "Visible" : "Not shown"));
+
+  consentEl.innerHTML = parts.join("");
 }
 
 function renderApp(items) {
   const appEl = document.getElementById("dockApp");
   if (!appEl) return;
 
-  // App detection lands in Step 5; read it if present
-  const app = items.find(it => it.id === "app");
-  if (!app) {
+  const details = items.find(it => it.id === "app")?.meta?.details;
+  if (!details || (!details.ios && !details.android)) {
     appEl.innerHTML = `
-      <p class="dockEmpty">Not checked</p>
-      <p class="dockNote">Advertiser app detection is coming soon.</p>`;
+      <p class="dockEmpty">None detected</p>
+      <p class="dockNote">Only signals carrying a valid App Store / Google Play ID are counted.</p>`;
     return;
   }
 
-  const signals = Array.isArray(app.meta?.signals) ? app.meta.signals : [];
-  appEl.innerHTML = `
-    <div class="dockKV">
-      <span class="dockKV__key">Status</span>
-      <span class="dockKV__val">${escapeHTML(app.label || "Detected")}</span>
-    </div>
-    ${signals.map(s => `
-    <div class="dockKV">
-      <span class="dockKV__key">Signal</span>
-      <span class="dockKV__val">${escapeHTML(typeof s === "string" ? s : JSON.stringify(s))}</span>
-    </div>`).join("")}`;
+  const PLATFORMS = [["ios", "iOS"], ["android", "Android"]];
+  const rows = PLATFORMS.map(([key, name]) => {
+    const app = details[key];
+    if (!app?.id) return "";
+    const lines = [
+      `via ${(app.sources || []).join(" · ")}`,
+      ...(app.otherIds?.length ? [`Also seen: ${app.otherIds.join(", ")}`] : [])
+    ];
+    return dkKV(name, `
+      <a href="${escapeHTML(app.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(app.id)}</a>
+      ${lines.map(l => `<p class="dockRow__detail">${escapeHTML(l)}</p>`).join("")}`);
+  }).join("");
+
+  const note = details.preferRelated ? `<p class="dockNote">Web manifest prefers the native app.</p>` : "";
+  appEl.innerHTML = rows + note;
 }
 
 function renderDock(items) {
   const list = Array.isArray(items) ? items : [];
-  renderCompat(list);
   renderTechReadout(list);
   renderConsent(list);
   renderApp(list);
 }
 
 function renderScanning() {
-  const compatText = document.getElementById("dockCompatText");
-  const compatChip = document.getElementById("dockCompatChip");
   const container = document.getElementById("techContainer");
   const consentEl = document.getElementById("dockConsent");
+  const appEl = document.getElementById("dockApp");
 
-  if (compatText) { compatText.textContent = "Scanning…"; compatText.style.fontStyle = ""; }
-  if (compatChip) compatChip.classList.add("is-hidden");
   if (container) container.innerHTML = `<p class="dockEmpty">Scanning…</p>`;
   if (consentEl) consentEl.innerHTML = `<p class="dockEmpty">Scanning…</p>`;
+  if (appEl) appEl.innerHTML = `<p class="dockEmpty">Scanning…</p>`;
 }
 
 function renderRestricted() {
-  const compatText = document.getElementById("dockCompatText");
-  const compatChip = document.getElementById("dockCompatChip");
   const container = document.getElementById("techContainer");
   const consentEl = document.getElementById("dockConsent");
   const appEl = document.getElementById("dockApp");
 
   setSiteURL("Restricted URL", true);
-  if (compatText) { compatText.textContent = "Restricted URL"; compatText.style.fontStyle = "italic"; }
-  if (compatChip) compatChip.classList.add("is-hidden");
-  if (container) container.innerHTML = "";
+  if (container) container.innerHTML = `<p class="dockEmpty">—</p>`;
   if (consentEl) consentEl.innerHTML = `<p class="dockEmpty">—</p>`;
   if (appEl) appEl.innerHTML = `<p class="dockEmpty">—</p>`;
+}
+
+// --- Awin UI: Provider Area jump ---
+function renderAwinUI(tab) {
+  const cardEl = document.getElementById("dockAwin");
+  const midEl = document.getElementById("dockAwinMID");
+  const btnEl = document.getElementById("dockProviderAreaBtn");
+  if (!cardEl) return;
+
+  dockAwinTab = tab;
+  dockAwinMID = awGetAdvertiserMID(tab?.url || "");
+
+  cardEl.classList.remove("is-hidden");
+  setSiteURL(awHostOf(tab?.url || ""), false);
+  if (midEl) midEl.textContent = dockAwinMID || "No advertiser in view";
+  if (btnEl) btnEl.disabled = !dockAwinMID;
+}
+
+function hideAwinUI() {
+  dockAwinTab = null;
+  dockAwinMID = "";
+  document.getElementById("dockAwin")?.classList.add("is-hidden");
 }
 
 // --- Shopify "click-to-copy" helper ---
@@ -287,8 +330,11 @@ async function refreshDock() {
 
   if (!url || BLOCKLIST.some(d => url.includes(d))) {
     renderRestricted();
+    if (awIsAwinUI(url)) renderAwinUI(tab); // detections don't apply, but the Provider Area jump does
+    else hideAwinUI();
     return;
   }
+  hideAwinUI();
 
   try {
     setSiteURL(new URL(url).hostname, false);
@@ -343,6 +389,11 @@ chrome.tabs.onActivated.addListener(({ windowId }) => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (tabId !== dockTabId) return;
   if (changeInfo.url || changeInfo.status === "complete") refreshDock();
+});
+
+// Provider Area jump (bound once; reads the tab/MID from the latest refresh)
+document.getElementById("dockProviderAreaBtn")?.addEventListener("click", () => {
+  awOpenProviderArea(dockAwinTab, dockAwinMID);
 });
 
 // Live detection results written by background.js

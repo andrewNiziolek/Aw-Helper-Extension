@@ -50,6 +50,18 @@
 					<p class="siteURL" id="siteURLText"></p>
 				</div>
 
+				<!-- Awin UI: jump to the active advertiser's Provider Area (awinUI.js) -->
+				<div class="glanceCard is-hidden" id="glanceAwin">
+					<p class="glanceCard__title">Awin UI</p>
+					<div class="glanceKV">
+						<span class="glanceKV__key">Advertiser</span>
+						<span class="glanceKV__val awinMIDRow">
+							<span id="glanceAwinMID">—</span>
+							<button type="button" class="dockButton glanceAwin__btn" id="providerAreaBtn">Provider Area</button>
+						</span>
+					</div>
+				</div>
+
 				<!-- Glance 1: Compatibility Rating (Simple) -->
 				<div class="glanceCard" id="glanceCompat">
 					<p class="glanceCard__title">Compatibility</p>
@@ -129,6 +141,7 @@
 
 		</div>
 		<script src="scripts/techConfig.js"></script>
+		<script src="scripts/awinUI.js"></script>
 		<script src="popup.js"></script>
 	</body>
 	<script src="/scripts/chipLinks.js"></script>

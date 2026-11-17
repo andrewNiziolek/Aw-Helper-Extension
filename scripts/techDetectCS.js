@@ -4,39 +4,60 @@
 (() => {
   console.log("🛠️ [Awin Helper] Tech Detection Script Injected");
 
-  //REGISTRIES & CONFIG
-  const CMP_REGISTRY = [
-    { id: "onetrust", name: "OneTrust", priority: 10, scripts: [/(^|:\/\/)cdn\.cookielaw\.org\/.*\/otSDKStub\.js(?:\?.*)?$/i, /(^|:\/\/)optanon\.blob\.core\.windows\.net\//i, /(^|:\/\/).*\.onetrust\.com\//i], globals: ["OneTrust", "OptanonActiveGroups", "Optanon"] },
-    { id: "cookiebot", name: "Cookiebot", priority: 20, scripts: [/(^|\/\/)consent\.cookiebot\.com\/uc\.js/i, /(^|\/\/).*\.cookiebot\.com\//i], globals: ["Cookiebot"] },
-    { id: "iubenda", name: "Iubenda", priority: 30, scripts: [/(^|\/\/)cdn\.iubenda\.com\//i, /(^|\/\/).*\.iubenda\.com\/cookie-policy\//i], globals: ["_iub", "iubenda"] },
-    { id: "osano", name: "Osano", priority: 40, scripts: [/(^|\/\/)cmp\.osano\.com\//i, /(^|\/\/).*\.osano\.com\//i], globals: ["Osano", "__osano"] },
-    { id: "sourcepoint", name: "SourcePoint", priority: 50, scripts: [/(^|\/\/)cdn\.privacy-mgmt\.com\//i, /(^|\/\/)notice\.sp-prod\.net\//i], globals: ["_sp_", "sp"] },
-    { id: "gcm", name: "Google Consent Mode", priority: 60, 
-      scriptsMatchFn: (u) => {
-        try {
-          const url = new URL(u, location.href);
-          return url.searchParams?.has("gcs") && (/(^|\/)gtm\.js$/.test(url.pathname) || /(^|\/)(collect|g\/collect)$/.test(url.pathname));
-        } catch { return false; }
-      },
-      globalsMatchFn: () => {
-        try { return typeof self.gtag === "function" && (self.gtag.toString().includes("consent") || !!self.google_tag_data?.consent); } catch { return false; }
-      }
-    },
-    { id: "shopify_native", name: "Shopify Native", priority: 100, 
-      globalsMatchFn: () => {
-        try { return typeof self.Shopify?.customerPrivacy === "object" && typeof self.Shopify.customerPrivacy.setTrackingConsent === "function"; } catch { return false; }
-      }
-    }
-  ];
+  // CONFIG (scripts/trackingDetect.js, loaded first in the same isolated world)
+  const CFG = globalThis.AWH_DETECT_CONFIG || {};
 
   // UTILITIES
   const safeURL = (src) => {
     try { return src ? new URL(src, location.href) : null; } catch { return null; }
   };
 
-  const hasAnyGlobal = (names) => {
-    try { return names?.some(n => typeof self[n] !== "undefined"); } catch { return false; }
-  };
+  function safeDecode(s=""){ try { return decodeURIComponent(s); } catch { return s; } }
+
+  // document.cookie -> Map(name -> raw value); first-party, non-HttpOnly cookies only
+  function readCookies() {
+    const jar = new Map();
+    try {
+      for (const part of document.cookie.split(";")) {
+        const i = part.indexOf("=");
+        if (i < 1) continue;
+        const name = part.slice(0, i).trim();
+        if (name && !jar.has(name)) jar.set(name, part.slice(i + 1).trim());
+      }
+    } catch {
+      // cookies blocked (sandboxed frame)
+    }
+    return jar;
+  }
+
+  function findCookie(jar, spec) {
+    if (spec?.name) return jar.has(spec.name) ? { name: spec.name, value: jar.get(spec.name) } : null;
+    if (spec?.prefix) {
+      for (const [name, value] of jar) if (name.startsWith(spec.prefix)) return { name, value };
+    }
+    return null;
+  }
+
+  function queryFirst(selectors) {
+    for (const sel of selectors || []) {
+      try {
+        const el = document.querySelector(sel);
+        if (el) return el;
+      } catch {
+        // bad selector: skip
+      }
+    }
+    return null;
+  }
+
+  // position:fixed banners have no offsetParent, so check rendered boxes + visibility instead
+  function isShown(el) {
+    if (!el) return false;
+    try {
+      if (typeof el.checkVisibility === "function") return el.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+      return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+    } catch { return false; }
+  }
 
   // --- Shopify .myshopify.com domain extraction ---
   const MYSHOPIFY_RX   = /([a-z0-9][a-z0-9-]*\.myshopify\.com)/i;
@@ -173,26 +194,199 @@
     return data;
   }
 
-  //CMP DETECTOR
-  function detectCMPProviders(scriptUrls) {
-    const found = [];
+  // --- CONSENT DETECTOR ---
+  // Cookie parsers: return { categories: { label: true|false|null }, interacted? } or null. Never guess.
+  const CONSENT_PARSERS = {
+    // OptanonConsent: ...&groups=C0001:1,C0002:0&interactionCount=1...
+    onetrust: (raw) => {
+      const v = safeDecode(raw);
+      const groups = v.match(/(?:^|&)groups=([^&]*)/)?.[1];
+      if (!groups) return null;
+      const labels = CFG.CONSENT_CATEGORY_LABELS?.onetrust || {};
+      const categories = {};
+      for (const pair of safeDecode(groups).split(",")) {
+        const [id, flag] = pair.split(":");
+        if (!id || (flag !== "0" && flag !== "1")) continue;
+        categories[labels[id] || id] = flag === "1";
+      }
+      const count = Number(v.match(/(?:^|&)interactionCount=(\d+)/)?.[1] || 0);
+      return Object.keys(categories).length ? { categories, interacted: count > 0 } : null;
+    },
 
-    CMP_REGISTRY.forEach(provider => {
-      let hit = false;
-      if (provider.scripts) hit = scriptUrls.some(u => provider.scripts.some(rx => rx.test(u)));
-      if (!hit && provider.scriptsMatchFn) hit = scriptUrls.some(u => provider.scriptsMatchFn(u));
-      if (!hit && provider.globals && hasAnyGlobal(provider.globals)) hit = true;
-      if (!hit && provider.globalsMatchFn && provider.globalsMatchFn()) hit = true;
+    // CookieConsent: {stamp:'..',necessary:true,preferences:false,statistics:false,marketing:false,method:'explicit',...}
+    cookiebot: (raw) => {
+      const v = safeDecode(raw);
+      if (v === "-1") return { categories: {}, interacted: false, note: "Consent not required in this region" };
+      const categories = {};
+      for (const m of v.matchAll(/(necessary|preferences|statistics|marketing):(true|false)/g)) {
+        categories[m[1][0].toUpperCase() + m[1].slice(1)] = m[2] === "true";
+      }
+      if (!Object.keys(categories).length) return null;
+      return { categories, interacted: /method:'?(explicit|implied)/.test(v) };
+    },
 
-      if (hit) found.push(provider);
-    });
+    // _tracking_consent: JSON, newer format has con.CMP = { a, m, p, s } with "1" | "0" | ""
+    shopify: (raw) => {
+      let data = null;
+      try { data = JSON.parse(safeDecode(raw)); } catch { return null; }
+      const cmp = data?.con?.CMP;
+      if (!cmp || typeof cmp !== "object") return null;
+      const labels = CFG.CONSENT_CATEGORY_LABELS?.shopify || {};
+      const categories = {};
+      let interacted = false;
+      for (const [key, flag] of Object.entries(cmp)) {
+        if (!(key in labels)) continue;
+        categories[labels[key]] = flag === "1" ? true : flag === "0" ? false : null;
+        if (flag === "1" || flag === "0") interacted = true;
+      }
+      return Object.keys(categories).length ? { categories, interacted } : null;
+    }
+  };
 
-    if (!found.length) return null;
+  // GCM: last gcs= value seen on a Google tag/collect request
+  function readGCM(scriptUrls) {
+    const gcm = CFG.CONSENT_FRAMEWORKS?.gcm;
+    if (!gcm) return { present: false };
+    let last = "";
+    for (const u of scriptUrls) {
+      if (!u.includes(gcm.param + "=")) continue;
+      const url = safeURL(u);
+      const val = url?.searchParams.get(gcm.param) || "";
+      if (url && gcm.pathRx.test(url.pathname) && gcm.valueRx.test(val)) last = val;
+    }
+    if (!last) return { present: false };
+    const [, ad, analytics] = last.match(gcm.valueRx);
+    const STATE = { "1": "granted", "0": "denied", "-": "unset" };
+    return { present: true, raw: last, ad_storage: STATE[ad], analytics_storage: STATE[analytics] };
+  }
 
-    found.sort((a, b) => a.priority - b.priority);
-    const uniq = Array.from(new Map(found.map(f => [f.id, f])).values());
+  function detectConsent(scriptUrls) {
+    const jar = readCookies();
+    const providers = [];
+    let banner = false;
 
-    return { providers: uniq.map(x => x.name), tooltip: uniq.map(x => x.name).join(", ") };
+    for (const p of CFG.CONSENT_PROVIDERS || []) {
+      const sources = [];
+      let state = null;
+      let interacted = false;
+
+      if ((p.scripts || []).length && scriptUrls.some(u => p.scripts.some(rx => rx.test(u)))) sources.push("script");
+
+      const domEl = queryFirst(p.dom);
+      if (domEl) sources.push("dom");
+
+      for (const spec of p.cookies || []) {
+        const c = findCookie(jar, spec);
+        if (!c) continue;
+        if (spec.match && !spec.match.test(safeDecode(c.value))) continue; // generic name, wrong format
+        if (!sources.includes("cookie")) sources.push("cookie");
+        if (spec.interacted) interacted = true;
+        if (spec.parse && !state) {
+          try { state = CONSENT_PARSERS[spec.parse]?.(c.value) || null; } catch { state = null; }
+        }
+      }
+
+      if (!sources.length) continue;
+
+      const bannerShown = isShown(queryFirst(p.banner));
+      if (bannerShown) banner = true;
+
+      providers.push({
+        id: p.id,
+        name: p.name,
+        priority: p.priority ?? 999,
+        sources,
+        bannerShown,
+        state: state
+          ? { categories: state.categories || {}, interacted: !!(state.interacted || interacted), note: state.note || "" }
+          : (interacted ? { categories: {}, interacted: true, note: "" } : null)
+      });
+    }
+
+    providers.sort((a, b) => a.priority - b.priority);
+
+    // Shopify Native is only worth showing when no third-party CMP is present
+    const hasThirdParty = providers.some(p => p.id !== "shopify_native");
+    if (hasThirdParty) {
+      const idx = providers.findIndex(p => p.id === "shopify_native");
+      if (idx !== -1) providers.splice(idx, 1);
+    }
+
+    const fw = CFG.CONSENT_FRAMEWORKS || {};
+    const tcfCookie = (fw.tcf?.cookies || []).some(n => jar.has(n));
+    const frameworks = {
+      tcf: { present: tcfCookie || !!queryFirst(fw.tcf?.dom), tcString: tcfCookie },
+      gpp: { present: !!queryFirst(fw.gpp?.dom) },
+      gcm: readGCM(scriptUrls)
+    };
+
+    return { providers, frameworks, banner };
+  }
+
+  // --- ADVERTISER APP DETECTOR ---
+  const manifestCache = new Map(); // manifest href -> Promise<{ hits, preferRelated }>
+
+  function fetchManifestApps(href) {
+    if (manifestCache.has(href)) return manifestCache.get(href);
+    const spec = CFG.APP_SIGNALS?.manifest || {};
+    const job = (async () => {
+      const out = { hits: [], preferRelated: false };
+      try {
+        const res = await fetch(href, { credentials: "same-origin", cache: "force-cache" });
+        if (!res.ok) return out;
+        const data = await res.json();
+        out.preferRelated = data?.prefer_related_applications === true;
+        for (const app of Array.isArray(data?.related_applications) ? data.related_applications : []) {
+          const platform = spec.platforms?.[app?.platform];
+          if (!platform) continue;
+          let id = String(app?.id || "").trim();
+          if (!id && app?.url) id = String(app.url).match(spec.urlRx?.[platform])?.[1] || "";
+          if (platform === "ios") id = id.replace(/^id/i, "");
+          out.hits.push({ platform, id, source: spec.label || "Web manifest" });
+        }
+      } catch {
+        // cross-origin / invalid JSON: no manifest signal
+      }
+      return out;
+    })();
+    manifestCache.set(href, job);
+    return job;
+  }
+
+  async function detectApps() {
+    const cfg = CFG.APP_SIGNALS || {};
+    const valid = cfg.validators || {};
+    const hits = [];
+
+    for (const sig of cfg.dom || []) {
+      try {
+        for (const el of document.querySelectorAll(sig.selector)) {
+          const id = String(el.getAttribute(sig.attr) || "").match(sig.rx)?.[1] || "";
+          hits.push({ platform: sig.platform, id, source: sig.label });
+        }
+      } catch {
+        // bad selector: skip
+      }
+    }
+
+    let preferRelated = false;
+    const manifestEl = cfg.manifest ? queryFirst([cfg.manifest.selector]) : null;
+    const manifestHref = manifestEl ? safeURL(manifestEl.getAttribute("href"))?.href : "";
+    if (manifestHref) {
+      const m = await fetchManifestApps(manifestHref);
+      hits.push(...m.hits);
+      preferRelated = m.preferRelated;
+    }
+
+    // Keep only IDs that pass the strict store-ID validators
+    const result = { ios: null, android: null, preferRelated };
+    for (const h of hits) {
+      if (!valid[h.platform]?.test(h.id)) continue;
+      const slot = result[h.platform] || (result[h.platform] = { id: h.id, url: (cfg.storeURL?.[h.platform] || "") + h.id, sources: [], otherIds: [] });
+      if (h.id !== slot.id && !slot.otherIds.includes(h.id)) slot.otherIds.push(h.id);
+      if (!slot.sources.includes(h.source)) slot.sources.push(h.source);
+    }
+    return result;
   }
 
   // MAIN EXECUTION
@@ -219,8 +413,36 @@
     if (env.tealium) items.push({ id: "tealium", label: env.tealium });
     if (env.dwinUrls.length) items.push({ id: "dwin1", label: env.dwinUrls[0], meta: { all: env.dwinUrls } });
 
-    const cmp = detectCMPProviders(env.scriptUrls);
-    if (cmp) items.push({ id: "cmp", label: "Cookie Consent", meta: { providers: cmp.providers, tooltip: cmp.tooltip } });
+    // Consent: Glance reads meta.summary, Dock reads meta.details
+    const consent = detectConsent(env.scriptUrls);
+    const fw = consent.frameworks;
+    if (consent.providers.length || fw.tcf.present || fw.gpp.present || fw.gcm.present) {
+      const names = consent.providers.map(p => p.name);
+      items.push({
+        id: "cmp",
+        label: "Cookie Consent",
+        meta: {
+          summary: { providers: names, tcf: fw.tcf.present, gpp: fw.gpp.present, gcm: fw.gcm.present, banner: consent.banner },
+          providers: names,        // legacy readers
+          tooltip: names.join(", "),
+          details: { providers: consent.providers, frameworks: fw, banner: consent.banner }
+        }
+      });
+    }
+
+    // Advertiser apps: emitted only when a store ID validated
+    const apps = await detectApps();
+    if (apps.ios || apps.android) {
+      const label = apps.ios && apps.android ? "iOS + Android" : apps.ios ? "iOS app" : "Android app";
+      items.push({
+        id: "app",
+        label,
+        meta: {
+          summary: { ios: !!apps.ios, android: !!apps.android },
+          details: { ios: apps.ios, android: apps.android, preferRelated: apps.preferRelated }
+        }
+      });
+    }
 
     console.log("Final Items Payload:", items);
     console.groupEnd();

@@ -133,15 +133,31 @@ function renderConsentApp(items) {
   const consentEl = document.getElementById("glanceConsentText");
   const appEl = document.getElementById("glanceAppText");
 
+  // 1. Consent: provider names + framework chips
   if (consentEl) {
-    const providers = items.find(it => it.id === "cmp")?.meta?.providers || [];
-    consentEl.textContent = providers.length ? providers.join(", ") : "None detected";
+    const meta = items.find(it => it.id === "cmp")?.meta;
+    const summary = meta?.summary || {};
+    const providers = summary.providers || meta?.providers || [];
+    const chips = [
+      summary.tcf ? "TCF" : "",
+      summary.gpp ? "GPP" : "",
+      summary.gcm ? "GCM" : ""
+    ].filter(Boolean).map(t => `<span class="chip chipEasy">${t}</span>`).join(" ");
+
+    if (!providers.length && !chips) consentEl.textContent = "None detected";
+    else consentEl.innerHTML = `${escapeHTML(providers.join(", "))}${providers.length && chips ? " " : ""}${chips}`;
   }
 
-  // App detection lands in Step 5; read it if present
+  // 2. Advertiser app: platform chips
   if (appEl) {
-    const app = items.find(it => it.id === "app");
-    appEl.textContent = app ? (app.label || "Detected") : "Not checked";
+    const summary = items.find(it => it.id === "app")?.meta?.summary || {};
+    const chips = [
+      summary.ios ? "iOS" : "",
+      summary.android ? "Android" : ""
+    ].filter(Boolean).map(t => `<span class="chip chipEasy">${t}</span>`).join(" ");
+
+    if (chips) appEl.innerHTML = chips;
+    else appEl.textContent = "None detected";
   }
 }
 
@@ -155,8 +171,10 @@ function renderGlance(items) {
 function renderScanning() {
   const compatText = document.getElementById("compatData");
   const container = document.getElementById("techContainer");
+  const appEl = document.getElementById("glanceAppText");
   if (compatText) compatText.textContent = "Scanning…";
   if (container) container.innerHTML = `<p class="glanceEmpty">Scanning…</p>`;
+  if (appEl) appEl.textContent = "Scanning…";
 }
 
 function renderRestricted() {
@@ -165,12 +183,35 @@ function renderRestricted() {
   const siteURLText = document.getElementById("siteURLText");
   const container = document.getElementById("techContainer");
   const consentEl = document.getElementById("glanceConsentText");
+  const appEl = document.getElementById("glanceAppText");
 
   if (compatText) { compatText.textContent = "Restricted URL"; compatText.style.fontStyle = "italic"; }
   if (compatChip) compatChip.classList.add("is-hidden");
   if (siteURLText) siteURLText.textContent = "Restricted URL";
   if (container) container.innerHTML = "";
   if (consentEl) consentEl.textContent = "—";
+  if (appEl) appEl.textContent = "—";
+}
+
+// --- Awin UI: Provider Area jump ---
+function renderAwinUI(tab) {
+  const cardEl = document.getElementById("glanceAwin");
+  const midEl = document.getElementById("glanceAwinMID");
+  const btnEl = document.getElementById("providerAreaBtn");
+  const siteURLText = document.getElementById("siteURLText");
+  if (!cardEl) return;
+
+  const mid = awGetAdvertiserMID(tab?.url || "");
+
+  cardEl.classList.remove("is-hidden");
+  if (siteURLText) { siteURLText.textContent = awHostOf(tab?.url || ""); siteURLText.style.fontStyle = "normal"; }
+  if (midEl) midEl.textContent = mid || "No advertiser in view";
+  if (!btnEl) return;
+
+  btnEl.disabled = !mid;
+  if (btnEl.dataset.awBound) return;
+  btnEl.dataset.awBound = "true";
+  btnEl.addEventListener("click", () => awOpenProviderArea(tab, mid));
 }
 
 // --- Shopify "click-to-copy" helper ---
@@ -233,6 +274,7 @@ async function initGlance() {
 
   if (BLOCKLIST.some(d => url.includes(d))) {
     renderRestricted();
+    if (awIsAwinUI(url)) renderAwinUI(tab); // detections don't apply, but the Provider Area jump does
     return;
   }
 

@@ -138,19 +138,6 @@ body {
 
 .inner-card .dockEmpty { margin: 4px 0; }
 
-/* Compatibility line */
-.dockCompat {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 40px;
-  margin-bottom: 6px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.inner-card .dockCompat__text { font-size: 14px; }
-
 /* Detection rows */
 .dockRow {
   display: grid;
@@ -216,6 +203,11 @@ body {
 
 .dockKV__key { color: var(--text-secondary); }
 .dockKV__val { overflow-wrap: anywhere; }
+
+/* Consent state text (status colors match .chipEasy / .chipDifficult) */
+.dockState { font-weight: 700; }
+.dockState.is-granted { color: #18a45b; }
+.dockState.is-denied  { color: #DE0732; }
 
 .inner-card .dockNote {
   margin-top: 6px;
@@ -318,6 +310,24 @@ body {
   outline: none;
   box-shadow: var(--input-focus-ring);
 }
+
+.append-button:disabled,
+.append-button:disabled:hover {
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  border-color: var(--border-base);
+  cursor: not-allowed;
+}
+
+/* Awin UI: MID + Provider Area on one row */
+.awinMIDRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dockAwin__btn { white-space: nowrap; }
 
 .collapsible {
   display: flex;
