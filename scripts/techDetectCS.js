@@ -38,27 +38,89 @@
     try { return names?.some(n => typeof self[n] !== "undefined"); } catch { return false; }
   };
 
-  const waitForShopify = async (timeout = 50) => {
-    return new Promise((resolve) => {
-      const start = Date.now();
-      const rgx = /Shopify\.shop\s*=\s*["']([^"']+)["']/;
-      
-      const tick = () => {
-        for (const s of document.scripts) {
-          const m = (s.textContent || "").match(rgx);
-          if (m) return resolve(m[1]);
-        }
-        Date.now() - start < timeout ? setTimeout(tick, 10) : resolve("");
-      };
-      tick();
-    });
-  };
+  // --- Shopify .myshopify.com domain extraction ---
+  const MYSHOPIFY_RX   = /([a-z0-9][a-z0-9-]*\.myshopify\.com)/i;
+  const SHOP_INLINE_RX = /(?:Shopify\.shop\s*=\s*|["']?(?:shop|myshopify_domain|permanent_domain)["']?\s*:\s*)["']([a-z0-9][a-z0-9-]*\.myshopify\.com)["']/i;
+  const SHOPIFY_SIG_RX = /myshopify\.com|cdn\.shopify\.com|\/cdn\/shop\//i;
+
+  function extractMyShopify(s=""){ const m = String(s).match(MYSHOPIFY_RX); return m ? m[1].toLowerCase() : ""; }
+
+  let metaJsonDomain = null; // null = not tried yet; "" = tried, nothing found
+
+  // Synchronous DOM/perf sweep, cheapest sources first
+  function sweepShopifyDomain() {
+    // 1. Host is itself the myshopify domain
+    const host = extractMyShopify(location.hostname);
+    if (host) return host;
+
+    // 2. Inline script text (Shopify.shop = "...", "shop":"...", myshopify_domain)
+    for (const s of document.scripts) {
+      if (s.src) continue;
+      const m = (s.textContent || "").match(SHOP_INLINE_RX);
+      if (m) return m[1].toLowerCase();
+    }
+
+    // 3. Script src attributes
+    for (const s of document.scripts) {
+      const d = extractMyShopify(s.src);
+      if (d) return d;
+    }
+
+    // 4. Link / meta tags
+    try {
+      for (const el of document.querySelectorAll('link[href*="myshopify.com"], meta[content*="myshopify.com"]')) {
+        const d = extractMyShopify(el.getAttribute("href") || el.getAttribute("content") || "");
+        if (d) return d;
+      }
+    } catch {
+      // selector unsupported? skip
+    }
+
+    // 5. Resource timing entries (headless Storefront API calls, late assets)
+    try {
+      for (const e of performance.getEntriesByType("resource")) {
+        const d = extractMyShopify(e?.name);
+        if (d) return d;
+      }
+    } catch {
+      // perf API unavailable
+    }
+
+    return "";
+  }
+
+  // 6. Same-origin /meta.json fallback (Liquid storefronts), at most once per page
+  async function fetchMetaJsonDomain() {
+    if (metaJsonDomain !== null) return metaJsonDomain;
+    metaJsonDomain = "";
+    try {
+      const res = await fetch("/meta.json", { cache: "force-cache", credentials: "omit" });
+      if (res.ok) {
+        const data = await res.json();
+        metaJsonDomain = extractMyShopify(data?.myshopify_domain || "");
+      }
+    } catch {
+      // not a liquid storefront
+    }
+    return metaJsonDomain;
+  }
+
+  async function findShopifyDomain(env, tries = 3, delay = 250) {
+    for (let i = 0; i < tries; i++) {
+      const d = sweepShopifyDomain();
+      if (d) return d;
+      if (!env?.shopifySrc) break; // no Shopify signal: don't wait around
+      if (i < tries - 1) await new Promise((r) => setTimeout(r, delay));
+    }
+    return env?.shopifySrc ? await fetchMetaJsonDomain() : "";
+  }
 
   // SINGLE-PASS SCANNER
   function scanPageEnvironment() {
     const data = {
       scriptUrls: [], gtmId: "", sgtmHost: false, dwinUrls: [],
       tealium: "", shopifySrc: /(?:^|\.)myshopify\.com$/i.test(location.hostname),
+      shopifyDomain: extractMyShopify(location.hostname),
       woo: false, adobe: false
     };
 
@@ -74,7 +136,10 @@
 
       data.scriptUrls.push(src);
 
-      if (!data.shopifySrc && src.includes("myshopify.com")) data.shopifySrc = true;
+      if (SHOPIFY_SIG_RX.test(src)) {
+        data.shopifySrc = true;
+        if (!data.shopifyDomain) data.shopifyDomain = extractMyShopify(src);
+      }
       if (!data.woo && src.includes("woocommerce")) data.woo = true;
       if (!data.adobe && src.includes("adobedtm")) data.adobe = true;
       if (!data.tealium && (src.includes("tiqcdn.com") || src.includes("tealiumiq.com"))) data.tealium = "Tealium IQ";
@@ -146,7 +211,7 @@
     if (env.gtmId) items.push({ id: "gtm", label: env.gtmId });
     if (env.sgtmHost) items.push({ id: "gtss", label: "GTM Server-Side" });
 
-    const shopDomain = await waitForShopify();
+    const shopDomain = env.shopifyDomain || await findShopifyDomain(env);
     if (env.shopifySrc || shopDomain) items.push({ id: "shopify", label: "Shopify", meta: { shopifyDomain: shopDomain || "" } });
 
     if (env.woo) items.push({ id: "woocommerce", label: "WooCommerce" });
