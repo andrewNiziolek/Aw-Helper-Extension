@@ -1,3 +1,5 @@
 /scripts/analytics.js
 .safurai/config.yml
 scripts/analytics.js
+.claudeignore
+/.claude
