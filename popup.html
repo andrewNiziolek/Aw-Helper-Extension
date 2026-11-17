@@ -12,12 +12,12 @@
 		<meta charset="UTF-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	  
+
 		<link rel="icon" href="assets/icon.png" />
 		<link rel="stylesheet" href="css/popstyle.css">
 		<link rel="stylesheet" href="css/global-main.css">
 		<link rel="stylesheet" href="css/fonts.css">
-	  
+
 		<title>Awin Helper</title>
 	</head>
 	<body class="">
@@ -36,99 +36,99 @@
 						  C196.3,134.3,170.1,108.2,137.9,108.2z M44.5,201.6c-19.3,0-35-15.7-35-35s15.7-35,35-35s35,15.7,35,35
 						  C79.5,185.9,63.8,201.6,44.5,201.6z"/>
 					  </g>
-					</svg> 
+					</svg>
 				  </div>
-				  
+
 				<h3 class="headText">Awin Helper</h3>
 				<p class="headVer">x.x</p>
-				<label class="headModeSwitch">
-					<input type="checkbox" id="modeSwitch">
-					<span class="slider round"></span>
-				</label>
-				<svg class="headAdv" id="spButton" width="100%" height="100%" viewBox="-14.07 -14.07 49.14 49.14" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" transform="translate(3 3)"><path d="m.5 12.5v-10c0-1.1045695.8954305-2 2-2h10c1.1045695 0 2 .8954305 2 2v10c0 1.1045695-.8954305 2-2 2h-10c-1.1045695 0-2-.8954305-2-2z"></path><path d="m12.5 12.5v-10c0-1.1045695-.8954305-2-2-2h2c1 0 2 .8954305 2 2v10c0 1.1045695-1 2-2 2h-2c1.1045695 0 2-.8954305 2-2z" fill="currentColor"></path><path d="m7.5 10.5 3-3-3-3"></path><path d="m10.5 7.5h-8"></path></g></g></svg>
 			</div>
 		</div>
-		<script src="popup.js"></script>
 		<div class="extBody">
 			<div class="leftContainer">
 				<div class="siteInfoDiv">
 					<p class="siteURL" id="siteURLText"></p>
-					<div class="compatibleDiv" id="compatibleBox">
-						<p class="compatText" id="compatData">Please submit integration <br> for manual review.</p>
-					</div>
-					<div class="ratingDiv" id="ratingBox">
-						<span class="chipRating" id="ratingChip">*</span>
-						<p class="ratingText" id="ratingData">Ease rating is based upon technical ability.</p>
+				</div>
+
+				<!-- Glance 1: Compatibility Rating (Simple) -->
+				<div class="glanceCard" id="glanceCompat">
+					<p class="glanceCard__title">Compatibility</p>
+					<div class="glanceCompat__body">
+						<span class="chip chipModerate is-hidden" id="compatChip"></span>
+						<p class="compatText" id="compatData">Scanning…</p>
 					</div>
 				</div>
 
-				<fieldset class="field_set" id="clipboard">
-					<div class="clipDiv">
-						<input type="text" id="clipMID" placeholder="Merchant ID" class="clipInput">
-						<input type="text" id="clipCR" placeholder="Commission Rate" class="clipInput">
-						<input type="text" id="clipNF" placeholder="Network Fee" class="clipInput">
-						<button type="button" class="append-button" id="clearClipBtn">Clear</button>				
+				<!-- Glance 4: Consent / App Summary -->
+				<div class="glanceCard" id="glanceConsent">
+					<p class="glanceCard__title">Consent &amp; Apps</p>
+					<div class="glanceKV">
+						<span class="glanceKV__key">Consent</span>
+						<span class="glanceKV__val" id="glanceConsentText">—</span>
 					</div>
-				</fieldset>
+					<div class="glanceKV">
+						<span class="glanceKV__key">App</span>
+						<span class="glanceKV__val" id="glanceAppText">Not checked</span>
+					</div>
+				</div>
+
+				<!-- Legacy tools: parked (hidden) until Step 4 moves them into the Dock -->
+				<div class="glanceTools" id="glanceTools" hidden>
+					<fieldset class="field_set" id="clipboard">
+						<div class="clipDiv">
+							<input type="text" id="clipMID" placeholder="Merchant ID" class="clipInput">
+							<input type="text" id="clipCR" placeholder="Commission Rate" class="clipInput">
+							<input type="text" id="clipNF" placeholder="Network Fee" class="clipInput">
+							<button type="button" class="append-button" id="clearClipBtn">Clear</button>
+						</div>
+					</fieldset>
+
+					<button class="collapsible" id="newImplView">
+						<span class="collapsible-label">New Implementation</span>
+						<span class="collapsible-icon">+</span>
+					</button>
+					<div class="collapse-content">
+						<p>Please enter the new MID.</p>
+						<div class="newImplDiv">
+							<input type="text" id="implMIDBox" placeholder="Merchant ID" class="clipInput">
+							<button type="button" class="append-button" id="newImplBtn">Go</button>
+						</div>
+					</div>
+
+					<button class="collapsible" id="intReviewView">
+						<span class="collapsible-label">Internal Review</span>
+						<span class="collapsible-icon">+</span>
+					</button>
+					<div class="collapse-content">
+						<p>Please enter an MID.</p>
+						<div class="intReviewDiv">
+							<input type="text" id="inRevMIDBox" placeholder="Merchant ID" class="clipInput">
+							<button type="button" class="append-button" id="intRevBtn">Go</button>
+						</div>
+					</div>
+
+					<button class="collapsible" id="testURLView">
+						<span class="collapsible-label">Test URL Generator</span>
+						<span class="collapsible-icon">+</span>
+					</button>
+					<div class="collapse-content">
+						<p>Enter an MID to generate a test URL.</p>
+						<div class="testURLDiv">
+							<input type="text" id="testURLMID" placeholder="Merchant ID" class="clipInput">
+							<button type="button" class="append-button" id="testURLBtn">Go</button>
+						</div>
+					</div>
+				</div>
 				<script src="/scripts/clipSaver.js"></script>
-
-				<button class="collapsible" id="newImplView">
-					<span class="collapsible-label">New Implementation</span>
-					<span class="collapsible-icon">+</span>
-				</button>
-					<div class="collapse-content">
-						<body class="upper">
-							<p>Please enter the new MID.</p>
-						</body>
-						<body class="lower">
-							<div class="newImplDiv">
-								<input type="text" id="implMIDBox" placeholder="Merchant ID" class="clipInput">
-								<button type="button" class="append-button" id="newImplBtn">Go</button>	
-							</div>
-						</body>
-					</div>
-
-				<button class="collapsible" id="intReviewView">
-					<span class="collapsible-label">Internal Review</span>
-					<span class="collapsible-icon">+</span>
-				</button>	
-					<div class="collapse-content">
-						<body class="upper">
-							<p>Please enter an MID.</p>
-						</body>
-						<body class="lower">
-							<div class="intReviewDiv">
-								<input type="text" id="inRevMIDBox" placeholder="Merchant ID" class="clipInput">
-								<button type="button" class="append-button" id="intRevBtn">Go</button>	
-							</div>
-						</body>
-					</div>
-
-				<button class="collapsible" id="testURLView">
-					<span class="collapsible-label">Test URL Generator</span>
-					<span class="collapsible-icon">+</span>
-				</button>				  
-					<div class="collapse-content">
-						<body class="upper">
-							<p>Enter an MID to generate a test URL.</p>
-						</body>
-						<body class="upper">
-							<div class="testURLDiv">
-								<input type="text" id="testURLMID" placeholder=" Merchant ID" class="clipInput">
-								<button type="button" class="append-button" id="testURLBtn">Go</button>	
-							</div>
-						</body>
-					</div>
-
 			</div>
-	
+
 			<div class="rightContainer">
-				
+				<button type="button" class="dockButton" id="openDockBtn">Open Dock</button>
+
 				<div class="announceDisplay" id="announceMount">
 				<!-- This content will be replaced by announce.js -->
 					<div class="announceIcon">
 						<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="90%" height="90%" viewBox="0 0 22 20">
-							<path fill="#5e5e5e" fill-rule="evenodd" d="M6 8a6 6 0 1112 0v2.917c0 .703.228 1.387.65 1.95L20.7 15.6a1.5 1.5 0 01-1.2 2.4h-15a1.5 
+							<path fill="#5e5e5e" fill-rule="evenodd" d="M6 8a6 6 0 1112 0v2.917c0 .703.228 1.387.65 1.95L20.7 15.6a1.5 1.5 0 01-1.2 2.4h-15a1.5
 							1.5 0 01-1.2-2.4l2.05-2.733a3.25 3.25 0 00.65-1.95V8zm6 13.5A3.502 3.502 0 018.645 19h6.71A3.502 3.502 0 0112 21.5z"/></svg>
 						</svg>
 					</div>
@@ -143,12 +143,12 @@
 						c1.657,0,3,1.343,3,3s-1.343,3-3,3s-3-1.343-3-3S23.343,11,25,11z M29,38h-2h-4h-2v-2h2V23h-2v-2h2h4v2v13h2V38z"/>
 					</symbol>
 					<symbol id="ann-warn" viewBox="0 0 512 512">
-						<path fill-rule="evenodd" d="M256 0c70.69 0 134.69 28.66 181.02 74.98C483.34 121.31 512 185.31 512 256c0 70.69-28.66 
-						134.69-74.98 181.02C390.69 483.34 326.69 512 256 512c-70.69 0-134.69-28.66-181.02-74.98C28.66 390.69 0 326.69 0 256c0-70.69 
-						28.66-134.69 74.98-181.02C121.31 28.66 185.31 0 256 0zm-15.38 310.18l-2.51-31.62c-4.26-52.99-8.07-94.08-8.08-149.34-.01-1.26.51-2.41 
-						1.34-3.24.83-.83 1.98-1.35 3.24-1.35h42.77c1.27 0 2.41.52 3.24 1.35a4.54 4.54 0 011.35 3.24c0 55.01-3.58 96.75-7.53 149.85l-2.31 31.32a4.584 
-						4.584 0 01-1.43 2.97c-.83.77-1.94 1.24-3.13 1.24H245.2a4.52 4.52 0 01-3.21-1.32c-.8-.79-1.32-1.89-1.37-3.1zm-6.01 72.6v-30.2c0-1.25.51-2.4 
-						1.34-3.23a4.54 4.54 0 013.24-1.35h33.61c1.26 0 2.41.51 3.24 1.34l.08.09c.78.83 1.27 1.95 1.27 3.15v30.2c0 1.27-.52 2.41-1.35 3.24-.83.83-1.98 
+						<path fill-rule="evenodd" d="M256 0c70.69 0 134.69 28.66 181.02 74.98C483.34 121.31 512 185.31 512 256c0 70.69-28.66
+						134.69-74.98 181.02C390.69 483.34 326.69 512 256 512c-70.69 0-134.69-28.66-181.02-74.98C28.66 390.69 0 326.69 0 256c0-70.69
+						28.66-134.69 74.98-181.02C121.31 28.66 185.31 0 256 0zm-15.38 310.18l-2.51-31.62c-4.26-52.99-8.07-94.08-8.08-149.34-.01-1.26.51-2.41
+						1.34-3.24.83-.83 1.98-1.35 3.24-1.35h42.77c1.27 0 2.41.52 3.24 1.35a4.54 4.54 0 011.35 3.24c0 55.01-3.58 96.75-7.53 149.85l-2.31 31.32a4.584
+						4.584 0 01-1.43 2.97c-.83.77-1.94 1.24-3.13 1.24H245.2a4.52 4.52 0 01-3.21-1.32c-.8-.79-1.32-1.89-1.37-3.1zm-6.01 72.6v-30.2c0-1.25.51-2.4
+						1.34-3.23a4.54 4.54 0 013.24-1.35h33.61c1.26 0 2.41.51 3.24 1.34l.08.09c.78.83 1.27 1.95 1.27 3.15v30.2c0 1.27-.52 2.41-1.35 3.24-.83.83-1.98
 						1.35-3.24 1.35h-33.61c-1.26 0-2.41-.52-3.24-1.35a4.556 4.556 0 01-1.34-3.24z"/>
 					</symbol>
 					<symbol id="ann-crit" viewBox="0 0 1200 1200">
@@ -165,19 +165,19 @@
 				<div class="announceAdditionalInfo" id="announceMore"></div>
 				<script src="/scripts/announce.js"></script>
 
-
-				<div class="inner-card">
-
-  					<div id="techContainer">
-      				</div>
+				<!-- Glance 2: Tech Detection Summary -->
+				<div class="glanceCard">
+					<p class="glanceCard__title">Tech Detected</p>
+					<div id="techContainer">
+						<p class="glanceEmpty">Scanning…</p>
+					</div>
 				</div>
-			<script src="scripts/techConfig.js"></script>
-			<script src="scripts/techPanel.js"></script>
 			</div>
 
 		</div>
+		<script src="scripts/techConfig.js"></script>
+		<script src="popup.js"></script>
 	</body>
 	<script src="/scripts/chipLinks.js"></script>
 	<script src="/scripts/toolHelpers.js"></script>
-	<script src="/scripts/modeSelect.js"></script>
 </html>

@@ -67,7 +67,7 @@ html{
 }
 
 body{
-    background: var(--bg-main);
+    background: var(--bg-body);
     width: 100%;
     text-align: center;
     font-family: 'Inter', sans-serif;
@@ -96,7 +96,7 @@ body{
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: var(--orange);;
+  background: var(--color-orange-base);
 }
 
 .tooltip {
@@ -143,15 +143,6 @@ body{
 
 .chipDifficult{
   background-color: #DE0732;
-}
-
-.chipRating{
-  color: var(--orange-strong);
-  height: 7px;
-  width: 7px;
-  background-color: var(--orange-strong);
-  border-radius: 5px;
-  margin-right: 5px;
 }
 
 .chip .chipIcon{

@@ -1,4 +1,4 @@
-/* Popup Styling */
+/* Popup Styling — "Glance" view */
 .headerContainer {
   max-width: 97%;
 }
@@ -8,8 +8,8 @@
   color: var(--color-off-white);
   grid-area: header;
   display: grid;
-  grid-template-columns: .15fr .15fr 1fr .15fr .15fr;
-  grid-template-areas: "head-a1 head-a head-b head-b1 head-c head-d";
+  grid-template-columns: 1fr .15fr .15fr .15fr;
+  grid-template-areas: "head-b head-b1 head-c head-d";
   background: var(--color-orange-base);
   justify-content: center;
   height: 2.5rem;
@@ -37,7 +37,7 @@
   position: relative;
   bottom: 5px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .headVer {
@@ -46,112 +46,13 @@
   font-weight: 300;
 }
 
-.headAdv {
-  grid-area: head-a1;
-  position: relative;
-  color: var(--color-off-white);
-  bottom: 6px;
-  right: 7px;
-}
-
-.headMode input {
-  position: absolute;
-  opacity: 0;
-}
-
-/* Header Mode Switch */
-.headModeSwitch {
-  grid-area: head-a;
-  position: relative;
-  display: inline-block;
-  margin-top: 5px;
-  width: 56px;
-  height: 28px;
-}
-
-.headModeSwitch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--color-orange-light);
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 22px;
-  width: 22px;
-  left: 4px;
-  bottom: 3px;
-  background-color: var(--color-off-white);
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:after {
-  content: ""; 
-  position: absolute;
-  top: 50%;
-  left: 8px;
-  transform: translateY(-50%);
-  color: var(--color-off-white);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  opacity: 0;
-  pointer-events: none;
-  -webkit-transition: opacity .4s;
-  transition: opacity .4s;
-}
-
-input:checked + .slider {
-  background-color: var(--color-orange-light);
-  background-color: var(--color-success);
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px var(--color-gray-800);
-}
-
-input:checked + .slider:before {
-  width: 11px;
-  border-radius: 0 22px 22px 0;
-  -webkit-transform: translateX(37px);
-  -ms-transform: translateX(37px);
-  transform: translateX(37px);
-}
-
-input:checked + .slider:after {
-  content: "tech";
-  opacity: 1;
-}
-
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
 .extBody {
-  display: grid; 
-  grid-auto-flow: column; 
-  grid-auto-rows: 1fr; 
-  grid-template-columns: 1fr 1fr; 
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-rows: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0px 10px;
-  max-width: 97%; 
+  max-width: 97%;
 }
 
 .leftContainer {
@@ -162,28 +63,13 @@ input:checked + .slider:after {
   grid-area: 1 / 2 / 2 / 3;
 }
 
-/* Legends */
-.legendText {
-  background-color: var(--color-white);
-  color: var(--bg-body);
-  text-align: left;
-  padding-left: 4px;
-  padding-right: 5px;
-  border-radius: 3px;
-}
-
-/* Fieldset */
-.field_set {
-  border: 2px solid var(--bg-body);
-  margin-top: 5px;
-  border-radius: 3px;
-}
-
 .siteInfoDiv {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 5px;
   height: 40px;
+  margin-bottom: 10px;
   color: var(--text-primary);
   border: none;
   background-color: var(--color-gray-300);
@@ -191,32 +77,169 @@ input:checked + .slider:after {
 }
 
 .siteURL {
-  font-size: 100%;
+  margin: 0;
+  font-size: 14px;
   font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 10px;
 }
 
-/* Mastertag */
-.mtDiv {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas: "a b";
-  place-items: center;
+/* --- Glance Cards --- */
+.glanceCard {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
   border-radius: 5px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  text-align: left;
+  box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
+}
+
+.glanceCard__title {
+  margin: 0 0 6px 0;
+  padding-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.glanceEmpty {
+  margin: 4px 0;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.glanceCard .chip {
+  margin: 0;
+  width: auto;
+  white-space: nowrap;
+}
+
+.is-hidden { display: none !important; }
+
+/* Compatibility */
+.glanceCompat__body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+
+.compatText {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+}
+
+/* Tech Summary rows */
+.glanceRow {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 10px;
   height: 40px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.glanceRow:last-child { border-bottom: none; }
+
+.glanceRow__icon {
+  width: 24px;
+  height: 24px;
+}
+
+.glanceRow__icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.glanceRow.has-sub { border-bottom: none; }
+
+.glanceRow__name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right-anchor tooltips on row chips so they don't clip at the popup edge */
+.glanceRow .tooltip::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+/* Consent / App */
+.glanceKV {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  font-size: 13px;
+}
+
+.glanceKV__key {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.glanceKV__val {
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+/* Open Dock */
+.dockButton {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px; /* matches .siteInfoDiv */
+  margin: 0 0 10px 0;
+  box-shadow: var(--shadow-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-orange-base);
+  background-color: var(--bg-surface);
+  border: 1.9px solid var(--color-orange-base);
+  border-radius: 25px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.dockButton:hover {
   color: var(--bg-body);
-  border: none;
-  background-color: var(--color-white);
-  margin-top: 3px;
+  background-color: var(--color-orange-base);
 }
 
-.mtPresent {
-  grid-area: a;
-  text-align: right;
+.dockButton:active {
+  color: var(--text-primary);
+  background-color: var(--color-orange-light);
 }
 
-.mtMark {
-  grid-area: b;
-  text-align: center;
+.dockButton:focus-visible {
+  outline: none;
+  box-shadow: var(--input-focus-ring);
+}
+
+/* --- Legacy tools (parked/hidden until Step 4 moves them into the Dock) --- */
+.glanceTools[hidden] { display: none; }
+
+/* Fieldset */
+.field_set {
+  border: 2px solid var(--bg-body);
+  margin-top: 5px;
+  border-radius: 3px;
 }
 
 /* Clipboard */
@@ -242,25 +265,86 @@ input:checked + .slider:after {
   color: var(--text-primary);
 }
 
-.compatibleDiv {
+/* Collapsibles */
+.collapsible {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  min-height: 80px;
-  max-height: 250px;
-  color: var(--text-primary);
-  background-color: var(--bg-body);
+  padding: 0 16px;
+  height: 40px;
+  width: 100%;
   border: none;
-  box-shadow: var(--shadow-md);
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 14px;
+  background-color: var(--color-white);
+  color: var(--text-primary);
+  border-radius: 5px;
+  margin-top: 5px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.2);
 }
 
-.compatText {
+.collapsible:hover,
+.collapsible.active {
+  background-color: var(--color-orange-light);
+  color: var(--text-primary);
+}
+
+.collapsible-icon {
   font-size: 14px;
-  font-weight: 400; /* Replaced 'regular' with valid font-weight */
-  text-align: center;
-  margin-top: 15px;
+  font-weight: 700;
+  position: relative;
+  top: 0px;
+  color: currentColor;
+  transition: color 0.2s;
+}
+
+.collapsible.active .collapsible-icon {
+  color: var(--color-orange-light);
+}
+
+.collapse-content {
+  color: var(--text-primary);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.1s ease-in-out;
+}
+
+.newImplDiv {
+  margin-bottom: 2px;
+}
+
+.testURLDiv {
+  display: grid;
+  gap: 4px;
+  place-items: center;
+  margin-top: 5px;
+  margin-bottom: 2px;
+}
+
+/* Tool actions */
+.append-button {
+  color: var(--color-orange-base);
+  background-color: var(--bg-body);
+  border: 1.9px solid var(--color-orange-base);
+  border-radius: 25px;
+  margin: 5px;
+  transition: 0.2s;
+}
+
+.append-button:hover {
+  color: var(--bg-body);
+  background-color: var(--color-orange-base);
+  border: 1.9px solid var(--color-orange-base);
+  cursor: pointer;
+}
+
+.append-button:active {
+  color: var(--text-primary);
+  background-color: var(--color-orange-light);
 }
 
 /* Announcements */
@@ -290,6 +374,13 @@ input:checked + .slider:after {
   display: flex;
   align-items: center;
   margin-left: 15px;
+}
+
+.techReadout {
+  text-align: left;
+  margin-left: 15px;
+  font-size: 14px;
+  font-weight: 300;
 }
 
 #announceText {
@@ -337,9 +428,9 @@ input:checked + .slider:after {
 .chipWarning { background-color: #ffe7bf; color: #7a4b00; }
 .chipCritical { background-color: #ffc9cf; color: #7a0013; }
 
-.announceChip {  
+.announceChip {
   margin-right: 15px;
-  margin-bottom: 25px; 
+  margin-bottom: 25px;
 }
 
 .announceAdditionalInfo.is-open { display: block; height: auto; min-height: 40px; }
@@ -376,10 +467,10 @@ input:checked + .slider:after {
   transition: 0.2s;
 }
 
-.annLink:hover { 
-  color: var(--bg-body); 
-  background: var(--color-orange-base); 
-  border-color: var(--color-orange-base); 
+.annLink:hover {
+  color: var(--bg-body);
+  background: var(--color-orange-base);
+  border-color: var(--color-orange-base);
 }
 
 .annDismiss {
@@ -394,72 +485,29 @@ input:checked + .slider:after {
 
 .annDismiss:hover { border-color: var(--color-orange-dark); color: var(--color-orange-dark); }
 
-/* Tech Display */
-.techDisplay {
-  display: none;
-  grid-template-columns: .25fr 1fr .35fr;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  height: 80px;
-  color: var(--text-primary);
-  border: none;
-  background-color: var(--color-white);
-  justify-content: center;
-  vertical-align: middle;
-  z-index: 2;
-  box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* Right-anchor tooltips on row chips so they don't clip at the popup edge */
-.techDisplay .tooltip::after {
-  left: auto;
-  right: 0;
-  transform: none;
-}
-
-.techIcon {
-  margin-top: 5px;
-  margin-left: 5px;
-}
-
-.techReadout {
-  text-align: left;
-  margin-top: 35px;
-  margin-left: 15px;
-  font-size: 14px;
-  font-weight: 300; /* Replaced 'light' */
-}
-
-.techAdditionalInfo {
-  display: none;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  height: 40px;
-  color: var(--text-primary);
-  border: none;
-  background-color: var(--color-gray-100);
-  justify-content: center;
-  vertical-align: middle;
-  z-index: 2;
-}
-
-/* Click to Copy Enhancements */
-#myShopifyInfo {
-  display: none;
+/* Shopify Copy (sub-row under the Shopify detection) */
+.glanceSubRow {
   position: relative;
+  margin: 0 0 6px 34px; /* align with the row name (24px icon + 10px gap) */
+  border-radius: 5px;
+  background-color: var(--bg-surface-alt);
 }
+
+.glanceSubRow:last-child { margin-bottom: 0; }
 
 #myShopifyText {
   display: block;
   position: relative;
-  line-height: 40px;
-  padding: 0 26px 0 12px;
+  line-height: 28px;
+  padding: 0 26px 0 10px;
   margin: 0;
+  font-size: 13px;
+  font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text-primary); 
+  color: var(--text-primary);
   transition: color 0.3s ease;
 }
 
@@ -489,10 +537,10 @@ input:checked + .slider:after {
 }
 
 @keyframes flashBg {
-  0%   { background-color: var(--color-off-white); }
+  0%   { background-color: var(--bg-surface-alt); }
   20%  { background-color: var(--color-orange-base); }
   80%  { background-color: var(--color-orange-base); }
-  100% { background-color: var(--color-off-white); }
+  100% { background-color: var(--bg-surface-alt); }
 }
 
 #myShopifyInfo.copyFlash #myShopifyText {
@@ -503,171 +551,10 @@ input:checked + .slider:after {
   fill: var(--bg-body);
 }
 
+/* Brand gradient (matches panel-global.css / sidepanel.css) */
 @keyframes scrollGradient {
-  0% { background-position: 0% 0%; }
-  50% { background-position: -50% 0%; }
-  100% { background-position: 0% 0%; }
-}
-
-.ratingDiv {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  height: 40px;
-  margin-top: 10px;
-  color: var(--text-primary);
-  border: none;
-  background-color: var(--bg-body);
-  box-shadow: var(--shadow-md);
-}
-
-/* Collapsibles & Dividers */
-hr.solid {
-  border-bottom: 1px solid var(--color-white);
-  border-right-width: 0px;
-  border-left-width: 0px;
-  margin-top: 4px;
-  margin-bottom: 4px;
-}
-
-.collapsible {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-  height: 40px;
-  width: 100%;
-  border: none;
-  font-weight: 400; /* Replaced 'regular' */
-  font-size: 14px;
-  background-color: var(--color-white);
-  color: var(--text-primary);
-  border-radius: 5px;
-  margin-top: 5px;
-  margin-bottom: 3px;
-  cursor: pointer;
-  transition: 0.2s;
-  box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.2);
-}
-
-.collapsible:hover,
-.collapsible.active {
-  background-color: var(--color-orange-light);
-  color: var(--text-primary);
-}
-
-.collapsible-icon {
-  font-size: 14px;
-  font-weight: bold;
-  position: relative;
-  top: 0px;
-  color: currentColor;
-  transition: color 0.2s;
-}
-
-.collapsible.active .collapsible-icon {
-  color: var(--color-orange-light);
-}
-
-.collapse-content {
-  color: var(--text-primary);
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.1s ease-in-out;
-}
-
-.newImplDiv {
-  margin-bottom: 2px;
-}
-
-.testURLDiv {
-  display: grid;
-  grid-template-rows: 2;
-  gap: 4px;
-  place-items: center;
-  margin-top: 5px;
-  margin-bottom: 2px;
-}
-
-/* Actions */
-.append-button {
-  color: var(--color-orange-base);
-  background-color: var(--bg-body);
-  border: 1.9px solid var(--color-orange-base);
-  border-radius: 25px;
-  margin: 5px;
-  transition: 0.2s;
-}
-
-.append-button:hover {
-  color: var(--bg-body);
-  background-color: var(--color-orange-base);
-  border: 1.9px solid var(--color-orange-base);
-  cursor: pointer;
-}
-
-.append-button:active {
-  color: var(--text-primary);
-  background-color: var(--color-orange-light);
-}
-
-.optionContainer {
-  background-color: var(--color-white);
-  display: grid;
-  grid-template-columns: 1fr .35fr;
-  margin: 10px;
-  border-radius: 10px;
-  padding: 10px;
-  padding-left: 35px;
-  text-align: left;
-}
-
-.opttext {
-  color: var(--bg-body);
-  border-left: 2px solid var(--color-orange-base);
-  padding-left: 15px;
-}
-
-input[type="checkbox"] {
-  accent-color: var(--color-orange-base);
-  width: 1.3em;
-  cursor: pointer;
-}
-
-/* Outputs */
-.opDiv {
-  display: grid;
-  grid-template-columns: 40px 160px 50px;
-  grid-template-rows: 33px;
-  gap: 5px;
-  grid-template-areas: "a b c";
-  align-items: center;
-  justify-items: center;
-  margin-left: 10px;
-  margin-bottom: 10px;
-}
-
-.opBox {
-  grid-area: a;
-  margin-top: 20px;
-}
-
-input[type="text"]#opBox {
-  grid-area: b;
-  border-radius: 5px;
-  width: 150px;
-  height: 25px;
-  color: var(--bg-body);
-  border: none;
-  background-color: #757575;
-  text-align: left;
-}
-
-.reset-icon {
-  grid-area: c;
-  fill: #242424;
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Logos */

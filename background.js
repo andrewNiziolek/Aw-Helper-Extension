@@ -251,6 +251,7 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
   }
   if (info.status === "loading") {
     mem.delete(tabId);
+    chrome.storage.session.remove("awh_det_" + tabId); // don't let Glance render the previous page's cache
     setBadge(tabId, 0);
     // content script will re-emit on DOMContentLoaded; if it doesn’t, popup will ping via GET handler
   }
